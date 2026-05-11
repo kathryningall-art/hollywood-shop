@@ -106,7 +106,7 @@ export default async function AdminDashboard() {
                 <tr key={look.id} className="border-b border-navy/10 hover:bg-cream/50">
                   <td className="py-3 pr-4 text-navy font-medium">{look.title}</td>
                   <td className="py-3 pr-4 text-navy/60">
-                    {(look.stars as { name: string } | null)?.name ?? "—"}
+                    {(look.stars as unknown as { name: string } | null)?.name ?? "—"}
                   </td>
                   <td className="py-3 pr-4 text-navy/60">{look.year}</td>
                   <td className="py-3 pr-4">
