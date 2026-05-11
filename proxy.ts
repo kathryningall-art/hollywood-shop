@@ -46,6 +46,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(adminUrl);
   }
 
+  supabaseResponse.headers.set("x-pathname", request.nextUrl.pathname);
   return supabaseResponse;
 }
 
