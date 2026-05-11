@@ -35,10 +35,6 @@ type Star = {
   hero_image_url: string | null;
 };
 
-type SheetState =
-  | { type: "closed" }
-  | { type: "look"; star: Star; look: Look };
-
 const networkLabel: Record<string, string> = {
   etsy: "Etsy",
   amazon: "Amazon",
@@ -56,229 +52,167 @@ export default function HomeClient({
   stars: Star[];
   looks: Look[];
 }) {
-  const [sheet, setSheet] = useState<SheetState>({ type: "closed" });
+  const [expandedLookId, setExpandedLookId] = useState<string | null>(null);
 
-  function openLook(star: Star, look: Look) {
-    setSheet({ type: "look", star, look });
+  function toggleLook(lookId: string) {
+    setExpandedLookId((prev) => (prev === lookId ? null : lookId));
   }
-
-  function close() {
-    setSheet({ type: "closed" });
-  }
-
-  const isOpen = sheet.type !== "closed";
 
   return (
-    <>
-      {/* Star sections */}
-      <div className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-10 pt-6">
-        {stars.map((star) => {
-          const starLooks = looks
-            .filter((l) => l.star_id === star.id)
-            .sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+    <div className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-10 pt-6">
+      {stars.map((star) => {
+        const starLooks = looks
+          .filter((l) => l.star_id === star.id)
+          .sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
 
-          if (starLooks.length === 0) return null;
+        if (starLooks.length === 0) return null;
 
-          return (
-            <section key={star.id}>
-              {/* Star header */}
-              <div className="flex items-baseline gap-3 mb-4">
-                <h2 className="font-serif text-navy text-xl md:text-2xl">{star.name}</h2>
-                <div className="h-px flex-1 bg-navy/10" />
-                <p className="text-brass text-xs tracking-widest uppercase shrink-0">
-                  Tap to shop
-                </p>
-              </div>
+        const expandedLook = starLooks.find((l) => l.id === expandedLookId);
 
-              {/* Looks row */}
-              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-                <div className="flex gap-3 md:gap-4 w-max md:w-auto md:grid md:grid-cols-3 lg:grid-cols-4">
-                  {starLooks.map((look) => (
+        return (
+          <section key={star.id}>
+            {/* Star header */}
+            <div className="flex items-baseline gap-3 mb-4">
+              <h2 className="font-serif text-navy text-xl md:text-2xl">{star.name}</h2>
+              <div className="h-px flex-1 bg-navy/10" />
+            </div>
+
+            {/* Look cards — horizontal scroll on mobile, grid on desktop */}
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 mb-1">
+              <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-3 lg:grid-cols-4">
+                {starLooks.map((look) => {
+                  const isActive = expandedLookId === look.id;
+                  return (
                     <button
                       key={look.id}
-                      onClick={() => openLook(star, look)}
+                      onClick={() => toggleLook(look.id)}
                       className="group block text-left shrink-0 w-44 md:w-auto"
                     >
-                      <div className="aspect-[3/4] relative overflow-hidden bg-navy/5 mb-2 rounded-sm">
+                      <div
+                        className={`aspect-[3/4] relative overflow-hidden mb-2 rounded-sm transition-all duration-300 ${
+                          isActive
+                            ? "ring-2 ring-brass ring-offset-1"
+                            : "ring-0"
+                        }`}
+                      >
                         {look.image_url && (
                           <Image
                             src={look.image_url}
                             alt={look.title}
                             fill
-                            className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-[1.03]"
+                            className={`object-cover object-top transition-all duration-500 ${
+                              isActive
+                                ? "grayscale-0 scale-[1.03]"
+                                : "grayscale group-hover:grayscale-0 group-hover:scale-[1.03]"
+                            }`}
                             sizes="(max-width: 640px) 176px, (max-width: 1024px) 33vw, 25vw"
                           />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent opacity-70 group-hover:opacity-30 transition-opacity duration-300" />
-                        <p className="absolute bottom-2 left-2 text-cream text-xs font-mono">
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent transition-opacity duration-300 ${
+                            isActive ? "opacity-20" : "opacity-70 group-hover:opacity-20"
+                          }`}
+                        />
+                        <p className="absolute bottom-2 left-2 text-cream text-xs font-mono drop-shadow">
                           {look.year}
                         </p>
-                        <div className="absolute inset-0 border border-brass/0 group-hover:border-brass/50 transition-colors duration-300 rounded-sm" />
+                        {/* Collapse hint */}
+                        {isActive && (
+                          <div className="absolute top-2 right-2 bg-brass text-cream text-xs w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                            ×
+                          </div>
+                        )}
                       </div>
-                      <p className="font-serif text-navy text-sm leading-snug group-hover:text-brass transition-colors">
+                      <p
+                        className={`font-serif text-sm leading-snug transition-colors ${
+                          isActive ? "text-brass" : "text-navy group-hover:text-brass"
+                        }`}
+                      >
                         {look.title}
                       </p>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            </section>
-          );
-        })}
-      </div>
+            </div>
 
-      {/* Backdrop */}
-      <div
-        onClick={close}
-        aria-hidden="true"
-        className={`fixed inset-0 bg-navy/60 z-40 transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      />
+            {/* Inline product expansion */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                expandedLook ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+              }`}
+            >
+              {expandedLook && (
+                <div className="border-t border-brass/30 pt-5">
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <p className="text-brass text-xs tracking-widest uppercase">
+                      {expandedLook.year}
+                    </p>
+                    <span className="text-navy/20">·</span>
+                    <p className="font-serif text-navy text-base">{expandedLook.title}</p>
+                  </div>
 
-      {/* Bottom sheet — look detail only */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        className={`fixed inset-x-0 bottom-0 z-50 max-h-[88vh] bg-cream rounded-t-2xl shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
-          isOpen ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full bg-navy/20" />
-        </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {[...(expandedLook.products ?? [])]
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((product) => (
+                        <div key={product.id} className="bg-warm-white border border-navy/8">
+                          <div className="aspect-square overflow-hidden bg-navy/5">
+                            {product.image_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={product.image_url}
+                                alt={product.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-navy/5" />
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <p className="text-navy text-xs font-medium leading-snug mb-1 line-clamp-2">
+                              {product.title}
+                            </p>
+                            {product.price_display && (
+                              <p className="text-navy/50 text-xs mb-2">{product.price_display}</p>
+                            )}
+                            <a
+                              href={product.affiliate_url}
+                              rel="sponsored nofollow"
+                              target="_blank"
+                              className="block text-center bg-navy text-cream text-xs py-2 tracking-widest uppercase hover:bg-brass transition-colors"
+                            >
+                              Shop {networkLabel[product.network] ?? product.retailer} ↗
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
 
-        <div className="overflow-y-auto flex-1 overscroll-contain">
-          {sheet.type === "look" && (
-            <LookView
-              star={sheet.star}
-              look={sheet.look}
-              onClose={close}
-            />
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
-function LookView({
-  star,
-  look,
-  onClose,
-}: {
-  star: Star;
-  look: Look;
-  onClose: () => void;
-}) {
-  const sortedProducts = [...(look.products ?? [])].sort(
-    (a, b) => a.display_order - b.display_order
-  );
-
-  return (
-    <div className="pb-10">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-2 pb-4">
-        <p className="text-xs text-navy/40 tracking-widest uppercase">{star.name}</p>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="text-navy/30 hover:text-navy transition-colors text-3xl leading-none px-1"
-        >
-          ×
-        </button>
-      </div>
-
-      {/* Look image */}
-      {look.image_url && (
-        <div className="aspect-[4/3] relative overflow-hidden mx-5 mb-5 rounded-sm">
-          <Image
-            src={look.image_url}
-            alt={look.title}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 640px) 90vw, 560px"
-          />
-        </div>
-      )}
-
-      {/* Title */}
-      <div className="px-5 mb-4">
-        <p className="text-brass text-xs tracking-[0.2em] uppercase mb-1">{look.year}</p>
-        <h2 className="font-serif text-navy text-2xl leading-snug">{look.title}</h2>
-      </div>
-
-      {/* Editorial */}
-      {look.editorial_text && (
-        <p className="px-5 text-navy/70 text-sm leading-relaxed mb-6">
-          {look.editorial_text}
-        </p>
-      )}
-
-      {/* Products */}
-      {sortedProducts.length > 0 && (
-        <div className="px-5">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-navy/10" />
-            <p className="text-xs tracking-[0.2em] uppercase text-navy/40">Shop the Look</p>
-            <div className="h-px flex-1 bg-navy/10" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {sortedProducts.map((product) => (
-              <div key={product.id} className="bg-warm-white border border-navy/8">
-                <div className="aspect-square overflow-hidden bg-navy/5">
-                  {product.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={product.image_url}
-                      alt={product.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-navy/5" />
+                  {expandedLook.image_credit && (
+                    <p className="text-navy/30 text-xs mt-4 leading-relaxed">
+                      {expandedLook.image_credit}
+                      {expandedLook.image_source_url && (
+                        <>
+                          {" "}
+                          <a
+                            href={expandedLook.image_source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-navy/50 transition-colors"
+                          >
+                            Source ↗
+                          </a>
+                        </>
+                      )}
+                    </p>
                   )}
                 </div>
-                <div className="p-3">
-                  <p className="text-navy text-xs font-medium leading-snug mb-1 line-clamp-2">
-                    {product.title}
-                  </p>
-                  {product.price_display && (
-                    <p className="text-navy/50 text-xs mb-2">{product.price_display}</p>
-                  )}
-                  <a
-                    href={product.affiliate_url}
-                    rel="sponsored nofollow"
-                    target="_blank"
-                    className="block text-center bg-navy text-cream text-xs py-2 tracking-widest uppercase hover:bg-brass transition-colors"
-                  >
-                    Shop {networkLabel[product.network] ?? product.retailer} ↗
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {look.image_credit && (
-            <p className="text-navy/30 text-xs mt-5 leading-relaxed">
-              {look.image_credit}
-              {look.image_source_url && (
-                <>
-                  {" "}
-                  <a
-                    href={look.image_source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-navy/50 transition-colors"
-                  >
-                    Source ↗
-                  </a>
-                </>
               )}
-            </p>
-          )}
-        </div>
-      )}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
