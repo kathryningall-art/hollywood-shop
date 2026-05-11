@@ -37,7 +37,6 @@ type Star = {
 
 type SheetState =
   | { type: "closed" }
-  | { type: "star"; star: Star; looks: Look[] }
   | { type: "look"; star: Star; look: Look };
 
 const networkLabel: Record<string, string> = {
@@ -59,13 +58,6 @@ export default function HomeClient({
 }) {
   const [sheet, setSheet] = useState<SheetState>({ type: "closed" });
 
-  function openStar(star: Star) {
-    const starLooks = looks
-      .filter((l) => l.star_id === star.id)
-      .sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
-    setSheet({ type: "star", star, looks: starLooks });
-  }
-
   function openLook(star: Star, look: Look) {
     setSheet({ type: "look", star, look });
   }
@@ -78,33 +70,61 @@ export default function HomeClient({
 
   return (
     <>
-      {/* Star grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 px-4 md:px-6 pb-16 max-w-6xl mx-auto">
-        {stars.map((star) => (
-          <button
-            key={star.id}
-            onClick={() => openStar(star)}
-            className="group block text-left"
-          >
-            <div className="aspect-[3/4] relative overflow-hidden bg-navy/5 portrait-frame mb-3">
-              {star.hero_image_url && (
-                <Image
-                  src={star.hero_image_url}
-                  alt={star.name}
-                  fill
-                  className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-[1.03]"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-transparent opacity-80 group-hover:opacity-30 transition-opacity duration-500" />
-              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-                <p className="font-serif text-cream text-sm md:text-base leading-tight drop-shadow">
-                  {star.name}
+      {/* Star sections */}
+      <div className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-10 pt-6">
+        {stars.map((star) => {
+          const starLooks = looks
+            .filter((l) => l.star_id === star.id)
+            .sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+
+          if (starLooks.length === 0) return null;
+
+          return (
+            <section key={star.id}>
+              {/* Star header */}
+              <div className="flex items-baseline gap-3 mb-4">
+                <h2 className="font-serif text-navy text-xl md:text-2xl">{star.name}</h2>
+                <div className="h-px flex-1 bg-navy/10" />
+                <p className="text-brass text-xs tracking-widest uppercase shrink-0">
+                  Tap to shop
                 </p>
               </div>
-            </div>
-          </button>
-        ))}
+
+              {/* Looks row */}
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="flex gap-3 md:gap-4 w-max md:w-auto md:grid md:grid-cols-3 lg:grid-cols-4">
+                  {starLooks.map((look) => (
+                    <button
+                      key={look.id}
+                      onClick={() => openLook(star, look)}
+                      className="group block text-left shrink-0 w-44 md:w-auto"
+                    >
+                      <div className="aspect-[3/4] relative overflow-hidden bg-navy/5 mb-2 rounded-sm">
+                        {look.image_url && (
+                          <Image
+                            src={look.image_url}
+                            alt={look.title}
+                            fill
+                            className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-[1.03]"
+                            sizes="(max-width: 640px) 176px, (max-width: 1024px) 33vw, 25vw"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent opacity-70 group-hover:opacity-30 transition-opacity duration-300" />
+                        <p className="absolute bottom-2 left-2 text-cream text-xs font-mono">
+                          {look.year}
+                        </p>
+                        <div className="absolute inset-0 border border-brass/0 group-hover:border-brass/50 transition-colors duration-300 rounded-sm" />
+                      </div>
+                      <p className="font-serif text-navy text-sm leading-snug group-hover:text-brass transition-colors">
+                        {look.title}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })}
       </div>
 
       {/* Backdrop */}
@@ -116,7 +136,7 @@ export default function HomeClient({
         }`}
       />
 
-      {/* Bottom sheet */}
+      {/* Bottom sheet — look detail only */}
       <div
         role="dialog"
         aria-modal="true"
@@ -124,26 +144,15 @@ export default function HomeClient({
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-navy/20" />
         </div>
 
-        {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 overscroll-contain">
-          {sheet.type === "star" && (
-            <StarView
-              star={sheet.star}
-              looks={sheet.looks}
-              onLookSelect={(look) => openLook(sheet.star, look)}
-              onClose={close}
-            />
-          )}
           {sheet.type === "look" && (
             <LookView
               star={sheet.star}
               look={sheet.look}
-              onBack={() => openStar(sheet.star)}
               onClose={close}
             />
           )}
@@ -153,102 +162,13 @@ export default function HomeClient({
   );
 }
 
-function StarView({
-  star,
-  looks,
-  onLookSelect,
-  onClose,
-}: {
-  star: Star;
-  looks: Look[];
-  onLookSelect: (look: Look) => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="pb-10">
-      {/* Header */}
-      <div className="flex items-start justify-between px-5 pt-2 pb-5">
-        <div>
-          <p className="text-brass tracking-[0.2em] uppercase text-xs mb-1">Collection</p>
-          <h2 className="font-serif text-navy text-3xl leading-tight">{star.name}</h2>
-        </div>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="text-navy/30 hover:text-navy transition-colors text-3xl leading-none mt-1 px-1"
-        >
-          ×
-        </button>
-      </div>
-
-      {/* Bio */}
-      {star.bio && (
-        <p className="px-5 text-navy/70 text-sm leading-relaxed mb-7">
-          {star.bio}
-        </p>
-      )}
-
-      {/* Ornament divider */}
-      <div className="px-5 mb-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-navy/10" />
-        <span className="text-brass text-xs">◆</span>
-        <div className="h-px flex-1 bg-navy/10" />
-      </div>
-
-      {/* Looks filmstrip */}
-      {looks.length > 0 ? (
-        <div>
-          <p className="px-5 text-xs tracking-[0.2em] uppercase text-navy/40 mb-4">
-            The Looks — tap to shop
-          </p>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex gap-3 px-5 w-max">
-              {looks.map((look) => (
-                <button
-                  key={look.id}
-                  onClick={() => onLookSelect(look)}
-                  className="group block text-left shrink-0 w-36 md:w-44"
-                >
-                  <div className="aspect-[3/4] relative overflow-hidden bg-navy/10 mb-2 rounded-sm">
-                    {look.image_url && (
-                      <Image
-                        src={look.image_url}
-                        alt={look.title}
-                        fill
-                        className="object-cover object-top brightness-90 group-hover:brightness-100 transition-all duration-300"
-                        sizes="180px"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy/70 to-transparent" />
-                    <p className="absolute bottom-2 left-2 right-2 text-cream text-xs font-mono">
-                      {look.year}
-                    </p>
-                    <div className="absolute inset-0 border border-brass/0 group-hover:border-brass/60 transition-colors duration-300 rounded-sm" />
-                  </div>
-                  <p className="font-serif text-navy text-sm leading-snug group-hover:text-brass transition-colors">
-                    {look.title}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <p className="px-5 text-navy/40 text-sm italic">No looks published yet.</p>
-      )}
-    </div>
-  );
-}
-
 function LookView({
   star,
   look,
-  onBack,
   onClose,
 }: {
   star: Star;
   look: Look;
-  onBack: () => void;
   onClose: () => void;
 }) {
   const sortedProducts = [...(look.products ?? [])].sort(
@@ -259,12 +179,7 @@ function LookView({
     <div className="pb-10">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-2 pb-4">
-        <button
-          onClick={onBack}
-          className="text-xs text-brass tracking-[0.15em] uppercase hover:text-navy transition-colors"
-        >
-          ← {star.name}
-        </button>
+        <p className="text-xs text-navy/40 tracking-widest uppercase">{star.name}</p>
         <button
           onClick={onClose}
           aria-label="Close"
@@ -321,9 +236,7 @@ function LookView({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-navy/5 flex items-center justify-center">
-                      <span className="text-navy/20 text-xs">No image</span>
-                    </div>
+                    <div className="w-full h-full bg-navy/5" />
                   )}
                 </div>
                 <div className="p-3">
