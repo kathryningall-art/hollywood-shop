@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-navy flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <p className="font-serif text-cream text-3xl mb-1">Dressed in Silver</p>
+          <p className="font-serif text-cream text-3xl mb-1">Bias Cut Bureau</p>
           <p className="text-brass text-xs tracking-widest uppercase">Admin</p>
         </div>
 

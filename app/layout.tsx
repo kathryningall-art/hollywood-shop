@@ -17,8 +17,8 @@ const ebGaramond = EB_Garamond({
 
 export const metadata: Metadata = {
   title: {
-    default: "Dressed in Silver — Classic Hollywood Style",
-    template: "%s | Dressed in Silver",
+    default: "Bias Cut Bureau — Classic Hollywood Style",
+    template: "%s | Bias Cut Bureau",
   },
   description:
     "Shop the looks of classic Hollywood's golden age — public-domain imagery, modern pieces inspired by the screen sirens of 1915–1969.",
@@ -41,16 +41,12 @@ export default function RootLayout({
               href="/"
               className="font-serif text-xl md:text-2xl tracking-wide text-navy hover:text-brass transition-colors group"
             >
-              Dressed in Silver
+              Bias Cut Bureau
               <span className="block h-px bg-brass scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left mt-0.5 opacity-60" />
             </Link>
             <nav className="hidden md:flex items-center gap-2 text-sm tracking-widest uppercase text-warm-gray">
               <Link href="/" className="hover:text-navy transition-colors px-3">
                 Collections
-              </Link>
-              <span className="text-brass/40 text-xs">◆</span>
-              <Link href="/about" className="hover:text-navy transition-colors px-3">
-                About
               </Link>
             </nav>
           </div>
@@ -62,7 +58,7 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-8 text-sm">
             <div>
               <p className="font-serif text-cream text-base mb-2">
-                Dressed in Silver
+                Bias Cut Bureau
               </p>
               <p className="leading-relaxed">
                 A curated editorial celebrating the style of classic Hollywood,

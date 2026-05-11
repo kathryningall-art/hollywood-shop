@@ -18,7 +18,7 @@ export default function AdminNav({ email }: { email: string }) {
     <header className="bg-navy text-cream border-b border-brass/30">
       <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <span className="font-serif text-lg tracking-wide">Dressed in Silver</span>
+          <span className="font-serif text-lg tracking-wide">Bias Cut Bureau</span>
           <span className="text-brass/50">◆</span>
           <nav className="flex items-center gap-5 text-xs tracking-widest uppercase">
             <Link href="/admin" className="hover:text-brass transition-colors">
