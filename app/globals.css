@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #f5f0e8;
+  --color-navy: #1b2a4a;
+  --color-brass: #b8964e;
+  --color-warm-gray: #8c8070;
+  --color-warm-white: #faf8f4;
+  --font-serif: var(--font-playfair);
+  --font-body: var(--font-eb-garamond);
+}
+
+:root {
+  --background: #f5f0e8;
+  --foreground: #1b2a4a;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-playfair), Georgia, serif;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* Ornamental brass divider */
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #b8964e;
+  opacity: 0.5;
+}
+
+/* Portrait frame — brass inset border on hover */
+.portrait-frame::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid #b8964e;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.group:hover .portrait-frame::after {
+  opacity: 0.7;
+}
+
+/* Filmstrip carousel scrollbar styling */
+.filmstrip::-webkit-scrollbar {
+  height: 4px;
+}
+.filmstrip::-webkit-scrollbar-track {
+  background: #1b2a4a;
+}
+.filmstrip::-webkit-scrollbar-thumb {
+  background: #b8964e;
+}
