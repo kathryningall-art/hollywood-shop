@@ -113,6 +113,9 @@ export default function HomeClient({
                             isActive ? "opacity-20" : "opacity-70 group-hover:opacity-20"
                           }`}
                         />
+                        <p className="absolute bottom-2 left-2 text-cream text-xs font-mono drop-shadow">
+                          {look.year}
+                        </p>
                         {/* Collapse hint */}
                         {isActive && (
                           <div className="absolute top-2 right-2 bg-brass text-cream text-xs w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -141,7 +144,13 @@ export default function HomeClient({
             >
               {expandedLook && (
                 <div className="border-t border-brass/30 pt-5">
-                  <p className="font-serif text-navy text-base mb-4">{expandedLook.title}</p>
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <p className="text-brass text-xs tracking-widest uppercase">
+                      {expandedLook.year}
+                    </p>
+                    <span className="text-navy/20">·</span>
+                    <p className="font-serif text-navy text-base">{expandedLook.title}</p>
+                  </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {[...(expandedLook.products ?? [])]
