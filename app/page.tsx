@@ -1,8 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { STARS } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: stars } = await supabase
+    .from("stars")
+    .select("id, name, slug, hero_image_url, death_year")
+    .order("name");
+
   return (
     <>
       {/* Hero */}
@@ -51,7 +57,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10">
-          {STARS.map((star) => (
+          {(stars ?? []).map((star) => (
             <Link
               key={star.id}
               href={`/stars/${star.slug}`}
@@ -59,13 +65,15 @@ export default function HomePage() {
             >
               {/* Portrait with frame effect */}
               <div className="aspect-[3/4] relative overflow-hidden bg-navy/5 mb-5 portrait-frame">
-                <Image
-                  src={star.heroImageUrl}
-                  alt={star.name}
-                  fill
-                  className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-[1.03]"
-                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                />
+                {star.hero_image_url && (
+                  <Image
+                    src={star.hero_image_url}
+                    alt={star.name}
+                    fill
+                    className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-[1.03]"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  />
+                )}
                 {/* Vignette overlay that lifts on hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent opacity-80 group-hover:opacity-30 transition-opacity duration-500" />
                 {/* Name overlay at bottom */}
@@ -76,9 +84,9 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="text-warm-gray text-xs tracking-widest uppercase group-hover:text-brass transition-colors duration-300">
-                {star.deathYear && star.deathYear <= 1929
+                {star.death_year && star.death_year <= 1929
                   ? "Silent Era"
-                  : star.deathYear && star.deathYear <= 1950
+                  : star.death_year && star.death_year <= 1950
                     ? "1920s – 1940s"
                     : "1920s – 1960s"}
               </p>

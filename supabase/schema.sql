@@ -27,35 +27,44 @@ create type affiliate_network as enum (
 );
 
 create table looks (
-  id                        uuid primary key default gen_random_uuid(),
-  star_id                   uuid not null references stars(id) on delete cascade,
-  slug                      text not null,
-  title                     text not null,
-  year                      integer not null,
-  image_url                 text not null,
-  image_credit              text not null default '',
-  image_source_url          text not null,
-  image_license             text not null,
-  license_verified          boolean not null default false,
+  id                         uuid primary key default gen_random_uuid(),
+  star_id                    uuid not null references stars(id) on delete cascade,
+  slug                       text not null,
+  title                      text not null,
+  year                       integer not null,
+  image_url                  text not null,
+  image_credit               text not null default '',
+  image_source_url           text not null,
+  image_license              text not null,
+  license_verified           boolean not null default false,
   license_verification_notes text not null default '',
-  editorial_text            text not null default '',
-  published                 boolean not null default false,
-  created_at                timestamptz not null default now(),
+  editorial_text             text not null default '',
+  published                  boolean not null default false,
+  created_at                 timestamptz not null default now(),
 
   unique(star_id, slug),
 
-  -- Cannot publish unless license is verified AND star is not blocked
+  -- License must be verified before publishing (single-table check, always valid)
   constraint published_requires_verified
-    check (
-      not published
-      or (
-        license_verified = true
-        and (
-          select publicity_rights_risk from stars where id = star_id
-        ) != 'blocked'
-      )
-    )
+    check (not published or license_verified = true)
 );
+
+-- Trigger to block publishing if the parent star is blocked
+create or replace function check_look_publishable()
+returns trigger as $$
+begin
+  if new.published = true then
+    if (select publicity_rights_risk from stars where id = new.star_id) = 'blocked' then
+      raise exception 'Cannot publish: star is blocked due to publicity rights concerns.';
+    end if;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger enforce_look_publishable
+  before insert or update on looks
+  for each row execute function check_look_publishable();
 
 -- ─────────────────────────────────────────────
 -- PRODUCTS
@@ -77,8 +86,8 @@ create table products (
 -- ROW LEVEL SECURITY
 -- (public read; write only via authenticated admin)
 -- ─────────────────────────────────────────────
-alter table stars   enable row level security;
-alter table looks   enable row level security;
+alter table stars    enable row level security;
+alter table looks    enable row level security;
 alter table products enable row level security;
 
 -- Anyone can read published content
@@ -94,7 +103,7 @@ create policy "admin write looks"    on looks    for all using (auth.role() = 'a
 create policy "admin write products" on products for all using (auth.role() = 'authenticated');
 
 -- ─────────────────────────────────────────────
--- HELPFUL INDEX
+-- HELPFUL INDEXES
 -- ─────────────────────────────────────────────
-create index looks_star_id_idx on looks(star_id);
-create index products_look_id_idx on products(look_id, display_order);
+create index looks_star_id_idx      on looks(star_id);
+create index products_look_id_idx   on products(look_id, display_order);
