@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import ProductFrame, { type MatchTier } from "@/app/components/ProductFrame";
 
 type Product = {
   id: string;
@@ -12,6 +13,7 @@ type Product = {
   affiliate_url: string;
   network: string;
   display_order: number;
+  match_tier: MatchTier;
 };
 
 type Look = {
@@ -44,6 +46,12 @@ const networkLabel: Record<string, string> = {
   rakuten: "Rakuten",
   direct: "Shop",
 };
+
+const TIER_CONFIG: { key: MatchTier; label: string; desc: string }[] = [
+  { key: "original_era",         label: "Original Era",          desc: "Genuine vintage pieces from this era" },
+  { key: "vintage_reproduction", label: "Vintage Reproduction",  desc: "Made today in period style" },
+  { key: "modern_inspired",      label: "Modern Inspired",        desc: "Contemporary pieces inspired by the look" },
+];
 
 export default function HomeClient({
   stars,
@@ -116,7 +124,6 @@ export default function HomeClient({
                         <p className="absolute bottom-2 left-2 text-cream text-xs font-mono drop-shadow">
                           {look.year}
                         </p>
-                        {/* Collapse hint */}
                         {isActive && (
                           <div className="absolute top-2 right-2 bg-brass text-cream text-xs w-5 h-5 rounded-full flex items-center justify-center leading-none">
                             ×
@@ -139,12 +146,12 @@ export default function HomeClient({
             {/* Inline product expansion */}
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedLook ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                expandedLook ? "max-h-[4000px] opacity-100 mt-4" : "max-h-0 opacity-0"
               }`}
             >
               {expandedLook && (
                 <div className="border-t border-brass/30 pt-5">
-                  <div className="flex items-baseline gap-2 mb-4">
+                  <div className="flex items-baseline gap-2 mb-6">
                     <p className="text-brass text-xs tracking-widest uppercase">
                       {expandedLook.year}
                     </p>
@@ -152,45 +159,73 @@ export default function HomeClient({
                     <p className="font-serif text-navy text-base">{expandedLook.title}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {[...(expandedLook.products ?? [])]
-                      .sort((a, b) => a.display_order - b.display_order)
-                      .map((product) => (
-                        <div key={product.id} className="bg-warm-white border border-navy/8">
-                          <div className="aspect-square overflow-hidden bg-navy/5">
-                            {product.image_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={product.image_url}
-                                alt={product.title}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-navy/5" />
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <p className="text-navy text-xs font-medium leading-snug mb-1 line-clamp-2">
-                              {product.title}
-                            </p>
-                            {product.price_display && (
-                              <p className="text-navy/50 text-xs mb-2">{product.price_display}</p>
-                            )}
-                            <a
-                              href={product.affiliate_url}
-                              rel="sponsored nofollow"
-                              target="_blank"
-                              className="block text-center bg-navy text-cream text-xs py-2 tracking-widest uppercase hover:bg-brass transition-colors"
-                            >
-                              Shop {networkLabel[product.network] ?? product.retailer} ↗
-                            </a>
-                          </div>
+                  {TIER_CONFIG.map(({ key, label, desc }) => {
+                    const tierProducts = [...(expandedLook.products ?? [])]
+                      .filter((p) => (p.match_tier ?? "modern_inspired") === key)
+                      .sort((a, b) => a.display_order - b.display_order);
+
+                    if (tierProducts.length === 0) return null;
+
+                    return (
+                      <div key={key} className="mb-8">
+                        {/* Tier heading */}
+                        <div className="mb-3">
+                          <p
+                            className="font-serif uppercase tracking-[0.12em] leading-none"
+                            style={{ fontSize: 13, color: "#6B5B3F" }}
+                          >
+                            {label}
+                          </p>
+                          <p
+                            className="italic mt-0.5"
+                            style={{ fontSize: 13, color: "#9C8B70", fontWeight: 400, lineHeight: 1.4 }}
+                          >
+                            {desc}
+                          </p>
                         </div>
-                      ))}
-                  </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {tierProducts.map((product) => (
+                            <div key={product.id} className="bg-warm-white">
+                              <ProductFrame tier={product.match_tier}>
+                                <div className="aspect-square overflow-hidden image-wrapper">
+                                  {product.image_url ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      src={product.image_url}
+                                      alt={product.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full bg-navy/5" />
+                                  )}
+                                </div>
+                              </ProductFrame>
+                              <div className="p-3">
+                                <p className="text-navy text-xs font-medium leading-snug mb-1 line-clamp-2">
+                                  {product.title}
+                                </p>
+                                {product.price_display && (
+                                  <p className="text-navy/50 text-xs mb-2">{product.price_display}</p>
+                                )}
+                                <a
+                                  href={product.affiliate_url}
+                                  rel="sponsored nofollow"
+                                  target="_blank"
+                                  className="block text-center bg-navy text-cream text-xs py-2 tracking-widest uppercase hover:bg-brass transition-colors"
+                                >
+                                  Shop {networkLabel[product.network] ?? product.retailer} ↗
+                                </a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
 
                   {expandedLook.image_credit && (
-                    <p className="text-navy/30 text-xs mt-4 leading-relaxed">
+                    <p className="text-navy/30 text-xs mt-2 leading-relaxed">
                       {expandedLook.image_credit}
                       {expandedLook.image_source_url && (
                         <>

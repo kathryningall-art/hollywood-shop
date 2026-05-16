@@ -73,7 +73,10 @@ export default function RootLayout({
                 supports the research and editorial work behind every look.
                 Affiliate links are marked with{" "}
                 <span className="text-brass">↗</span> and carry{" "}
-                <code className="text-xs">rel=&quot;sponsored nofollow&quot;</code>.
+                <code className="text-xs">rel=&quot;sponsored nofollow&quot;</code>.{" "}
+                <Link href="/about/our-picks" className="underline hover:text-cream/80 transition-colors">
+                  About our picks ↗
+                </Link>
               </p>
             </div>
           </div>

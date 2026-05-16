@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { FrameSwatch, type MatchTier } from "@/app/components/ProductFrame";
+import { suggestProducts, type ProductSuggestion } from "@/app/actions/suggestProducts";
 
 type Product = {
   id: string;
@@ -14,16 +16,23 @@ type Product = {
   affiliate_url: string;
   network: string;
   display_order: number;
+  match_tier: MatchTier;
 };
 
-const NETWORK_OPTIONS = [
-  "amazon",
-  "etsy",
-  "nordstrom",
-  "shareasale",
-  "impact",
-  "rakuten",
-  "direct",
+type LookMeta = {
+  title: string;
+  year: number | null;
+  image_url: string | null;
+  editorial_text: string | null;
+  star_name: string;
+};
+
+const NETWORK_OPTIONS = ["amazon", "etsy", "nordstrom", "shareasale", "impact", "rakuten", "direct"];
+
+const TIER_OPTIONS: { value: MatchTier; label: string; desc: string }[] = [
+  { value: "original_era",         label: "Original Era",         desc: "Genuine vintage from the period" },
+  { value: "vintage_reproduction", label: "Vintage Reproduction", desc: "Made today in period style" },
+  { value: "modern_inspired",      label: "Modern Inspired",      desc: "Contemporary, inspired by the look" },
 ];
 
 const EMPTY_PRODUCT = {
@@ -32,14 +41,15 @@ const EMPTY_PRODUCT = {
   image_url: "",
   price_display: "",
   affiliate_url: "",
-  network: "amazon",
+  network: "etsy",
   display_order: 0,
+  match_tier: "modern_inspired" as MatchTier,
 };
 
 export default function ProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [lookId, setLookId] = useState("");
-  const [lookTitle, setLookTitle] = useState("");
+  const [lookMeta, setLookMeta] = useState<LookMeta | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
@@ -47,15 +57,32 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // AI suggest state
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState<ProductSuggestion[] | null>(null);
+  const [suggestError, setSuggestError] = useState("");
+
   useEffect(() => {
     params.then(({ id }) => {
       setLookId(id);
       const supabase = createClient();
       Promise.all([
-        supabase.from("looks").select("title").eq("id", id).single(),
+        supabase
+          .from("looks")
+          .select("title, year, image_url, editorial_text, stars(name)")
+          .eq("id", id)
+          .single(),
         supabase.from("products").select("*").eq("look_id", id).order("display_order"),
       ]).then(([{ data: look }, { data: prods }]) => {
-        setLookTitle(look?.title ?? "");
+        if (look) {
+          setLookMeta({
+            title: look.title ?? "",
+            year: look.year ?? null,
+            image_url: look.image_url ?? null,
+            editorial_text: look.editorial_text ?? null,
+            star_name: (look.stars as unknown as { name: string } | null)?.name ?? "",
+          });
+        }
         setProducts(prods ?? []);
         setLoading(false);
       });
@@ -66,10 +93,11 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function startNew() {
-    setForm({ ...EMPTY_PRODUCT, display_order: products.length + 1 });
+  function startNew(prefill?: Partial<typeof EMPTY_PRODUCT>) {
+    setForm({ ...EMPTY_PRODUCT, display_order: products.length + 1, ...prefill });
     setEditingId("new");
     setError("");
+    setSuggestions(null);
   }
 
   function startEdit(p: Product) {
@@ -81,6 +109,7 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
       affiliate_url: p.affiliate_url,
       network: p.network,
       display_order: p.display_order,
+      match_tier: p.match_tier ?? "modern_inspired",
     });
     setEditingId(p.id);
     setError("");
@@ -100,11 +129,12 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
       look_id: lookId,
       title: form.title,
       retailer: form.retailer,
-      image_url: form.image_url || null,
+      image_url: form.image_url || "",
       price_display: form.price_display || null,
       affiliate_url: form.affiliate_url,
       network: form.network,
       display_order: form.display_order,
+      match_tier: form.match_tier,
     };
 
     let err;
@@ -137,6 +167,26 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
     setProducts((prev) => prev.filter((p) => p.id !== id));
   }
 
+  async function handleSuggest() {
+    if (!lookMeta?.image_url) return;
+    setSuggesting(true);
+    setSuggestError("");
+    setSuggestions(null);
+    const result = await suggestProducts({
+      imageUrl: lookMeta.image_url,
+      starName: lookMeta.star_name,
+      year: lookMeta.year,
+      title: lookMeta.title,
+      editorialText: lookMeta.editorial_text ?? "",
+    });
+    setSuggesting(false);
+    if (result.success) {
+      setSuggestions(result.suggestions);
+    } else {
+      setSuggestError(result.error);
+    }
+  }
+
   if (loading) return <p className="text-navy/50 text-sm">Loading…</p>;
 
   return (
@@ -147,7 +197,7 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
         </Link>
       </div>
       <h1 className="font-serif text-navy text-2xl mb-1">Products</h1>
-      {lookTitle && <p className="text-navy/50 text-sm mb-8">{lookTitle}</p>}
+      {lookMeta?.title && <p className="text-navy/50 text-sm mb-8">{lookMeta.title}</p>}
 
       {/* Product list */}
       <div className="space-y-3 mb-6">
@@ -172,29 +222,20 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
               className="border border-navy/10 px-4 py-3 flex items-center gap-4 bg-white hover:border-navy/20"
             >
               {p.image_url && (
-                <img
-                  src={p.image_url}
-                  alt={p.title}
-                  className="w-12 h-12 object-cover flex-shrink-0"
-                />
+                <img src={p.image_url} alt={p.title} className="w-12 h-12 object-cover flex-shrink-0" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-navy text-sm font-medium truncate">{p.title}</p>
                 <p className="text-navy/50 text-xs">
                   {p.retailer} · {p.network} · {p.price_display || "no price"} · order {p.display_order}
                 </p>
+                <p className="text-navy/40 text-xs capitalize">{(p.match_tier ?? "modern_inspired").replace(/_/g, " ")}</p>
               </div>
               <div className="flex gap-3 flex-shrink-0">
-                <button
-                  onClick={() => startEdit(p)}
-                  className="text-xs text-brass hover:text-navy uppercase tracking-widest"
-                >
+                <button onClick={() => startEdit(p)} className="text-xs text-brass hover:text-navy uppercase tracking-widest">
                   Edit
                 </button>
-                <button
-                  onClick={() => deleteProduct(p.id)}
-                  className="text-xs text-navy/30 hover:text-red-600 uppercase tracking-widest"
-                >
+                <button onClick={() => deleteProduct(p.id)} className="text-xs text-navy/30 hover:text-red-600 uppercase tracking-widest">
                   Delete
                 </button>
               </div>
@@ -216,12 +257,66 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
       </div>
 
       {editingId === null && (
-        <button
-          onClick={startNew}
-          className="bg-navy text-cream text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass transition-colors"
-        >
-          + Add Product
-        </button>
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={() => startNew()}
+            className="bg-navy text-cream text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass transition-colors"
+          >
+            + Add Product
+          </button>
+          <button
+            onClick={handleSuggest}
+            disabled={suggesting || !lookMeta?.image_url}
+            className="border border-brass text-brass text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass hover:text-cream transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            title={!lookMeta?.image_url ? "Add an image URL to the look first" : ""}
+          >
+            {suggesting ? "Suggesting…" : "Suggest Products"}
+          </button>
+        </div>
+      )}
+
+      {suggestError && <p className="mt-3 text-red-600 text-sm">{suggestError}</p>}
+
+      {/* AI suggestions panel */}
+      {suggestions && editingId === null && (
+        <div className="mt-6 border border-brass/30 bg-cream/30 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs tracking-widest uppercase text-navy/60">Suggested Products</p>
+            <button onClick={() => setSuggestions(null)} className="text-navy/30 hover:text-navy text-lg leading-none">×</button>
+          </div>
+          <div className="space-y-3">
+            {suggestions.map((s, i) => (
+              <div key={i} className="flex items-start gap-3 border border-navy/10 bg-white p-3">
+                <FrameSwatch tier={s.match_tier} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-navy text-sm font-medium">{s.title}</p>
+                  <p className="text-navy/50 text-xs">{s.retailer} · {s.network} · {s.match_tier.replace(/_/g, " ")}</p>
+                  <p className="text-navy/40 text-xs italic mt-0.5">Search: {s.search_hint}</p>
+                </div>
+                <button
+                  onClick={() =>
+                    startNew({
+                      title: s.title,
+                      retailer: s.retailer,
+                      network: s.network,
+                      match_tier: s.match_tier,
+                    })
+                  }
+                  className="text-xs text-brass hover:text-navy uppercase tracking-widest flex-shrink-0"
+                >
+                  Use ↑
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={handleSuggest}
+            disabled={suggesting}
+            className="mt-4 text-xs tracking-widest uppercase text-navy/50 hover:text-navy transition-colors disabled:opacity-40"
+          >
+            Regenerate
+          </button>
+        </div>
       )}
     </div>
   );
@@ -250,6 +345,30 @@ function ProductForm({
         {isNew ? "New Product" : "Edit Product"}
       </p>
 
+      {/* Tier selector */}
+      <div>
+        <label className={label}>Tier *</label>
+        <div className="flex flex-col gap-2">
+          {TIER_OPTIONS.map((t) => (
+            <label key={t.value} className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="radio"
+                name="match_tier"
+                value={t.value}
+                checked={form.match_tier === t.value}
+                onChange={() => set("match_tier", t.value)}
+                className="accent-navy mt-0.5"
+              />
+              <FrameSwatch tier={t.value} />
+              <div>
+                <p className="text-navy text-sm font-medium leading-none">{t.label}</p>
+                <p className="text-navy/50 text-xs mt-0.5">{t.desc}</p>
+              </div>
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <label className={label}>Title *</label>
@@ -275,11 +394,7 @@ function ProductForm({
 
         <div>
           <label className={label}>Network *</label>
-          <select
-            value={form.network}
-            onChange={(e) => set("network", e.target.value)}
-            className={input}
-          >
+          <select value={form.network} onChange={(e) => set("network", e.target.value)} className={input}>
             {NETWORK_OPTIONS.map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}

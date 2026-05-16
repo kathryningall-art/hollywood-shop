@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { generateEditorial, type EditorialVariant } from "@/app/actions/generateEditorial";
 
 const LICENSE_OPTIONS = [
   { value: "public_domain_us", label: "Public Domain (US)" },
@@ -23,6 +24,9 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [variants, setVariants] = useState<EditorialVariant[] | null>(null);
+  const [generateError, setGenerateError] = useState("");
 
   const [form, setForm] = useState({
     star_id: "",
@@ -125,7 +129,7 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
         image_license: form.image_license,
         license_verified: form.license_verified,
         license_verification_notes: form.license_verification_notes || null,
-        editorial_text: form.editorial_text || null,
+        editorial_text: form.editorial_text || "",
         published: form.published,
       })
       .eq("id", id);
@@ -293,14 +297,93 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
           </Field>
         </div>
 
-        <Field label="Editorial Text">
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-navy text-xs tracking-widest uppercase">
+              Editorial Text
+            </label>
+            <button
+              type="button"
+              disabled={generating || !form.image_url}
+              onClick={async () => {
+                setGenerating(true);
+                setGenerateError("");
+                setVariants(null);
+                const result = await generateEditorial({
+                  imageUrl: form.image_url,
+                  starName: stars.find((s) => s.id === form.star_id)?.name ?? "",
+                  year: parseInt(form.year) || null,
+                  title: form.title,
+                });
+                setGenerating(false);
+                if (result.success) {
+                  setVariants(result.variants);
+                } else {
+                  setGenerateError(result.error);
+                }
+              }}
+              className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={!form.image_url ? "Add an image URL first" : ""}
+            >
+              {generating ? "Generating…" : "Generate editorial"}
+            </button>
+          </div>
           <textarea
             value={form.editorial_text}
             onChange={(e) => set("editorial_text", e.target.value)}
             rows={5}
             className={input}
           />
-        </Field>
+          {generateError && (
+            <p className="mt-2 text-sm text-red-600">{generateError}</p>
+          )}
+          {variants && (
+            <div className="mt-3 space-y-2">
+              {variants.map((v) => (
+                <div key={v.voice} className="border border-navy/15 bg-cream/60 p-3">
+                  <p className="text-xs tracking-widest uppercase text-navy/40 mb-1 capitalize">
+                    {v.voice}
+                  </p>
+                  <p className="text-navy text-sm leading-relaxed">{v.text}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      set("editorial_text", v.text);
+                      setVariants(null);
+                    }}
+                    className="mt-2 text-xs tracking-widest uppercase text-brass hover:text-navy transition-colors"
+                  >
+                    Use this ↑
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                disabled={generating}
+                onClick={async () => {
+                  setGenerating(true);
+                  setGenerateError("");
+                  setVariants(null);
+                  const result = await generateEditorial({
+                    imageUrl: form.image_url,
+                    starName: stars.find((s) => s.id === form.star_id)?.name ?? "",
+                    year: parseInt(form.year) || null,
+                    title: form.title,
+                  });
+                  setGenerating(false);
+                  if (result.success) {
+                    setVariants(result.variants);
+                  } else {
+                    setGenerateError(result.error);
+                  }
+                }}
+                className="text-xs tracking-widest uppercase text-navy/50 hover:text-navy transition-colors disabled:opacity-40"
+              >
+                Regenerate
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="border-t border-navy/10 pt-6">
           <label className="flex items-start gap-3 cursor-pointer">

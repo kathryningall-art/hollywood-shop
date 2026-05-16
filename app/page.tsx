@@ -8,12 +8,12 @@ export default async function HomePage() {
     supabase
       .from("stars")
       .select("id, name, slug, bio, hero_image_url")
-      .order("name"),
+      .order("display_order"),
     supabase
       .from("looks")
       .select(`
         id, star_id, slug, title, year, image_url, image_credit, image_source_url, editorial_text,
-        products(id, title, retailer, image_url, price_display, affiliate_url, network, display_order)
+        products(id, title, retailer, image_url, price_display, affiliate_url, network, display_order, match_tier)
       `)
       .eq("published", true)
       .order("year"),
