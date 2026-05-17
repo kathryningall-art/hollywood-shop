@@ -22,6 +22,7 @@ type Look = {
   slug: string;
   title: string;
   year: number | null;
+  display_order: number;
   image_url: string | null;
   image_credit: string | null;
   image_source_url: string | null;
@@ -71,7 +72,7 @@ export default function HomeClient({
       {stars.map((star) => {
         const starLooks = looks
           .filter((l) => l.star_id === star.id)
-          .sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+          .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 
         if (starLooks.length === 0) return null;
 
@@ -85,16 +86,16 @@ export default function HomeClient({
               <div className="h-px flex-1 bg-navy/10" />
             </div>
 
-            {/* Look cards — horizontal scroll on mobile, grid on desktop */}
-            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 mb-1">
-              <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-3 lg:grid-cols-4">
+            {/* Look cards — horizontal filmstrip on all screen sizes */}
+            <div className="overflow-x-auto -mx-4 px-4 mb-1">
+              <div className="flex gap-3 w-max pb-2">
                 {starLooks.map((look) => {
                   const isActive = expandedLookId === look.id;
                   return (
                     <button
                       key={look.id}
                       onClick={() => toggleLook(look.id)}
-                      className="group block text-left shrink-0 w-44 md:w-auto"
+                      className="group block text-left shrink-0 w-44 md:w-52"
                     >
                       <div
                         className={`aspect-[3/4] relative overflow-hidden mb-2 rounded-sm transition-all duration-300 ${
