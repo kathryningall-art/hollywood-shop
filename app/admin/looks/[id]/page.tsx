@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { generateEditorial, type EditorialVariant } from "@/app/actions/generateEditorial";
+import ImageUpload from "@/app/admin/ImageUpload";
 
 const LICENSE_OPTIONS = [
   { value: "public_domain_us", label: "Public Domain (US)" },
@@ -256,6 +257,11 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
                 value={form.image_url}
                 onChange={(e) => set("image_url", e.target.value)}
                 className={input}
+              />
+              <ImageUpload
+                currentUrl={form.image_url}
+                onUploaded={(url) => set("image_url", url)}
+                folder="looks"
               />
             </Field>
             <Field label="Image Credit">

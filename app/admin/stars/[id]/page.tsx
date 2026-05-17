@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import ImageUpload from "@/app/admin/ImageUpload";
 
 const RISK_OPTIONS = [
   { value: "low", label: "Low — died 50+ years ago, no estate activity" },
@@ -138,6 +139,11 @@ export default function EditStarPage({ params }: { params: Promise<{ id: string 
             value={form.hero_image_url}
             onChange={(e) => set("hero_image_url", e.target.value)}
             className={input}
+          />
+          <ImageUpload
+            currentUrl={form.hero_image_url}
+            onUploaded={(url) => set("hero_image_url", url)}
+            folder="stars"
           />
         </Field>
 
