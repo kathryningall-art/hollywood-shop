@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, EB_Garamond } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -37,12 +38,15 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-cream text-navy">
         <header className="border-b border-navy/10 bg-cream/90 backdrop-blur-sm sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <Link
-              href="/"
-              className="font-serif text-xl md:text-2xl tracking-wide text-navy hover:text-brass transition-colors group"
-            >
-              Bias Cut Bureau
-              <span className="block h-px bg-brass scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left mt-0.5 opacity-60" />
+            <Link href="/" className="block">
+              <Image
+                src="/brand/C1-lockup-horizontal.png"
+                alt="Bias Cut Bureau"
+                width={2400}
+                height={884}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
             <nav className="hidden md:flex items-center gap-2 text-sm tracking-widest uppercase text-warm-gray">
               <Link href="/" className="hover:text-navy transition-colors px-3">

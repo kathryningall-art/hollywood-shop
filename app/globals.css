@@ -169,3 +169,185 @@ h4 {
 .filmstrip::-webkit-scrollbar-thumb {
   background: #b8964e;
 }
+
+/* ── PRODUCT SCROLL ROW (Change 1) ──────────────────────────────────────── */
+
+.product-scroll-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.75rem;
+  /* hide scrollbar visually, keep it accessible */
+  scrollbar-width: none;
+}
+.product-scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.product-card-snap {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  width: 156px;
+}
+@media (min-width: 640px) {
+  .product-card-snap {
+    width: 176px;
+  }
+}
+
+/* ── FLOATING PRODUCT PREVIEW STRIP (Change 3) ──────────────────────────── */
+
+.product-strip {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 156px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  background: rgba(245, 240, 232, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(184, 150, 78, 0.35);
+  box-shadow: 0 -4px 16px rgba(27, 42, 74, 0.08);
+  z-index: 9999;
+  /* start hidden below viewport */
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+.product-strip--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+/* Teaser variant: slightly more transparent, softer border */
+.product-strip--teaser {
+  background: rgba(245, 240, 232, 0.76);
+  border-top-color: rgba(184, 150, 78, 0.14);
+}
+@media (min-width: 768px) {
+  .product-strip {
+    height: 204px;
+  }
+}
+
+.product-strip__label {
+  font-family: var(--font-serif);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b8964e;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.product-strip__thumbs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  flex: 1;
+  align-items: center;
+  scrollbar-width: none;
+  /* padding gives outline shimmer room to breathe without being clipped */
+  padding: 6px 2px;
+  transition: opacity 0.28s ease;
+}
+.product-strip__thumbs::-webkit-scrollbar {
+  display: none;
+}
+.product-strip__thumbs--fading {
+  opacity: 0;
+}
+
+.product-strip__thumb {
+  flex-shrink: 0;
+  width: 78px;
+  height: 78px;
+  overflow: hidden;
+  border: 1px solid rgba(184, 150, 78, 0.35);
+  border-radius: 2px;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+  opacity: 0.72;
+}
+@media (min-width: 768px) {
+  .product-strip__thumb {
+    width: 104px;
+    height: 104px;
+  }
+}
+.product-strip__thumb:hover {
+  border-color: #b8964e;
+  opacity: 1;
+}
+.product-strip__thumb--active {
+  border: 2px solid #b8964e;
+  opacity: 1;
+}
+
+.product-strip__dismiss {
+  flex-shrink: 0;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+  color: rgba(27, 42, 74, 0.35);
+  transition: color 0.2s ease;
+}
+.product-strip__dismiss:hover {
+  color: #1b2a4a;
+}
+
+/* Ghost placeholder boxes shown in teaser mode */
+.product-strip__ghost {
+  flex-shrink: 0;
+  width: 136px;
+  height: 136px;
+  border: 1px solid rgba(184, 150, 78, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+@media (min-width: 768px) {
+  .product-strip__ghost {
+    width: 182px;
+    height: 182px;
+  }
+}
+/* Shimmer on look photo cards — outline is used so overflow:hidden doesn't clip it */
+.look-card--shimmer {
+  animation: look-shimmer 2s ease-in-out infinite;
+}
+@keyframes look-shimmer {
+  0%, 100% {
+    outline: 3px solid rgba(184, 150, 78, 0.9);
+    outline-offset: 0px;
+  }
+  50% {
+    outline: 3px solid rgba(184, 150, 78, 0.1);
+    outline-offset: 8px;
+  }
+}
+
+/* cream veil over the ghost image */
+.product-strip__ghost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(245, 240, 232, 0.72);
+}
+
+/* Nudge label shown in teaser mode */
+.product-strip__teaser-label {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #1b2a4a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
