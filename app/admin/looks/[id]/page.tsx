@@ -22,6 +22,8 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
   const [id, setId] = useState("");
   const [stars, setStars] = useState<{ id: string; name: string; publicity_rights_risk: string }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -99,6 +101,21 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
 
   const starBlocked = selectedStar?.publicity_rights_risk === "blocked";
   const canPublish = form.license_verified && !starBlocked;
+
+  async function handleDelete() {
+    setDeleting(true);
+    setError("");
+    const supabase = createClient();
+    const { error: err } = await supabase.from("looks").delete().eq("id", id);
+    if (err) {
+      setError(err.message);
+      setDeleting(false);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push("/admin");
+    router.refresh();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -422,6 +439,38 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
           >
             Cancel
           </button>
+        </div>
+
+        <div className="border-t border-red-200 pt-6 mt-4">
+          <p className="text-xs tracking-widest uppercase text-red-400 mb-3">Danger Zone</p>
+          {!confirmDelete ? (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="text-xs tracking-widest uppercase text-red-500 hover:text-red-700 border border-red-300 hover:border-red-500 px-4 py-2 transition-colors"
+            >
+              Delete Look
+            </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-red-700">Permanently delete this look and all its products?</p>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-xs tracking-widest uppercase bg-red-600 text-white px-4 py-2 hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting…" : "Yes, Delete"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs tracking-widest uppercase text-navy/50 hover:text-navy transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       </form>
     </div>
