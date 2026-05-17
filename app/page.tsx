@@ -22,11 +22,8 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-navy text-cream px-6 py-5">
+      <section className="bg-navy text-cream px-6 py-3">
         <div className="max-w-6xl mx-auto">
-          <p className="text-brass tracking-[0.2em] uppercase text-xs mb-1">
-            Classic Hollywood
-          </p>
           <h1 className="font-serif text-2xl md:text-3xl">
             Shop the <em className="italic text-brass/90">Look</em>
           </h1>

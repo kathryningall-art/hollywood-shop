@@ -44,7 +44,7 @@ export default function RootLayout({
                 alt="Bias Cut Bureau"
                 width={2400}
                 height={884}
-                className="h-10 w-auto"
+                className="h-20 w-auto"
                 priority
               />
             </Link>
