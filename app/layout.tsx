@@ -36,11 +36,11 @@ export default function RootLayout({
       className={`${playfair.variable} ${ebGaramond.variable} h-full`}
     >
       <body className="min-h-full flex flex-col bg-cream text-navy">
-        <header className="border-b border-navy/10 bg-cream/90 backdrop-blur-sm sticky top-0 z-50">
+        <header className="border-b border-navy/10 bg-cream sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link href="/" className="block">
               <Image
-                src="/brand/C1-lockup-horizontal.png"
+                src="/brand/M4-lockup-horizontal.png"
                 alt="Bias Cut Bureau"
                 width={2400}
                 height={884}

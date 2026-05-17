@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-cream: #f5f0e8;
+  --color-cream: #F1E9D4;
   --color-navy: #1b2a4a;
   --color-brass: #b8964e;
   --color-warm-gray: #8c8070;
@@ -11,7 +11,7 @@
 }
 
 :root {
-  --background: #f5f0e8;
+  --background: #F1E9D4;
   --foreground: #1b2a4a;
 }
 
@@ -209,7 +209,7 @@ h4 {
   align-items: center;
   gap: 0.75rem;
   padding: 0 1rem;
-  background: rgba(245, 240, 232, 0.96);
+  background: rgba(241, 233, 212, 0.96);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid rgba(184, 150, 78, 0.35);
@@ -228,7 +228,7 @@ h4 {
 }
 /* Teaser variant: slightly more transparent, softer border */
 .product-strip--teaser {
-  background: rgba(245, 240, 232, 0.76);
+  background: rgba(241, 233, 212, 0.76);
   border-top-color: rgba(184, 150, 78, 0.14);
 }
 @media (min-width: 768px) {
@@ -338,7 +338,7 @@ h4 {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(245, 240, 232, 0.72);
+  background: rgba(241, 233, 212, 0.72);
 }
 
 /* Nudge label shown in teaser mode */
