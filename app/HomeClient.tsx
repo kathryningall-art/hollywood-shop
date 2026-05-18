@@ -22,6 +22,7 @@ type Look = {
   slug: string;
   title: string;
   year: number | null;
+  year_display: string | null;
   display_order: number;
   image_url: string | null;
   image_credit: string | null;
@@ -250,7 +251,7 @@ export default function HomeClient({
                             }`}
                           />
                           <p className="absolute bottom-2 left-2 text-cream text-xs font-mono drop-shadow">
-                            {look.year}
+                            {look.year_display ?? look.year}
                           </p>
                           {isActive && (
                             <div className="absolute top-2 right-2 bg-brass text-cream text-xs w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -281,7 +282,7 @@ export default function HomeClient({
                   <div className="border-t border-brass/30 pt-3">
                     <div className="flex items-baseline gap-2 mb-3">
                       <p className="text-brass text-xs tracking-widest uppercase">
-                        {starExpandedLook.year}
+                        {starExpandedLook.year_display ?? starExpandedLook.year}
                       </p>
                       <span className="text-navy/20">·</span>
                       <p className="font-serif text-navy text-base">{starExpandedLook.title}</p>

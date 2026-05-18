@@ -36,6 +36,7 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
     slug: "",
     title: "",
     year: "",
+    year_display: "",
     image_url: "",
     image_credit: "",
     image_source_url: "",
@@ -72,6 +73,7 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
             slug: data.slug ?? "",
             title: data.title ?? "",
             year: data.year ? String(data.year) : "",
+            year_display: data.year_display ?? "",
             image_url: data.image_url ?? "",
             image_credit: data.image_credit ?? "",
             image_source_url: data.image_source_url ?? "",
@@ -141,6 +143,7 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
         slug: form.slug,
         title: form.title,
         year: year || null,
+        year_display: form.year_display || null,
         image_url: form.image_url || null,
         image_credit: form.image_credit || null,
         image_source_url: form.image_source_url || null,
@@ -235,6 +238,19 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
             max={1970}
             className={`${input} w-32`}
           />
+          <p className="text-navy/40 text-xs mt-1.5">If the exact year is unknown, enter an approximate year above and fill in the display label below.</p>
+        </Field>
+
+        <Field label="Year Display (optional)">
+          <input
+            type="text"
+            value={form.year_display}
+            onChange={(e) => set("year_display", e.target.value)}
+            placeholder="e.g. 1930s, ca. 1938, Early 1940s"
+            className={input}
+          />
+          <p className="text-navy/40 text-xs mt-1.5">Shown on look cards instead of the year number when filled in.</p>
+        </Field>
           {eraWarning && (
             <p
               className={`mt-2 text-sm px-3 py-2 border ${
