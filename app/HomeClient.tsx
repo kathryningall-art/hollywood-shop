@@ -224,7 +224,7 @@ export default function HomeClient({
               </div>
 
               {/* Look cards — horizontal filmstrip on all screen sizes */}
-              <div className="overflow-x-auto -mx-4 px-4 mb-1">
+              <div className="filmstrip overflow-x-auto -mx-4 px-4 mb-1">
                 <div className="flex gap-3 w-max pb-2">
                   {starLooks.map((look) => {
                     const isActive = expandedLookId === look.id;

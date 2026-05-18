@@ -160,14 +160,23 @@ h4 {
 }
 
 /* Filmstrip carousel scrollbar styling */
+.filmstrip {
+  scrollbar-width: thin;
+  scrollbar-color: #B89752 rgba(27, 42, 74, 0.08);
+}
 .filmstrip::-webkit-scrollbar {
-  height: 4px;
+  height: 5px;
 }
 .filmstrip::-webkit-scrollbar-track {
-  background: #1b2a4a;
+  background: rgba(27, 42, 74, 0.08);
+  border-radius: 9999px;
 }
 .filmstrip::-webkit-scrollbar-thumb {
-  background: #b8964e;
+  background: #B89752;
+  border-radius: 9999px;
+}
+.filmstrip::-webkit-scrollbar-thumb:hover {
+  background: #D4B26A;
 }
 
 /* ── PRODUCT SCROLL ROW (Change 1) ──────────────────────────────────────── */
