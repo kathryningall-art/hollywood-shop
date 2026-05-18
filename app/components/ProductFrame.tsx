@@ -1,4 +1,4 @@
-export type MatchTier = "original_era" | "vintage_reproduction" | "modern_inspired";
+export type MatchTier = "original_era" | "vintage_pre_owned" | "vintage_reproduction" | "modern_inspired";
 
 export default function ProductFrame({
   tier,

@@ -31,6 +31,7 @@ const NETWORK_OPTIONS = ["amazon", "etsy", "nordstrom", "shareasale", "impact", 
 
 const TIER_OPTIONS: { value: MatchTier; label: string; desc: string }[] = [
   { value: "original_era",         label: "Original Era",         desc: "Genuine vintage from the period" },
+  { value: "vintage_pre_owned",    label: "Vintage / Pre-Owned",  desc: "Actual secondhand vintage item" },
   { value: "vintage_reproduction", label: "Vintage Reproduction", desc: "Made today in period style" },
   { value: "modern_inspired",      label: "Modern Inspired",      desc: "Contemporary, inspired by the look" },
 ];

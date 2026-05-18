@@ -50,13 +50,15 @@ const networkLabel: Record<string, string> = {
 
 const TIER_ORDER: Record<MatchTier, number> = {
   original_era: 0,
-  vintage_reproduction: 1,
-  modern_inspired: 2,
+  vintage_pre_owned: 1,
+  vintage_reproduction: 2,
+  modern_inspired: 3,
 };
 
 const TIER_SHORT: Record<MatchTier, string> = {
   original_era: "Antique",
-  vintage_reproduction: "Vintage",
+  vintage_pre_owned: "Pre-Owned",
+  vintage_reproduction: "Reproduction",
   modern_inspired: "Modern",
 };
 

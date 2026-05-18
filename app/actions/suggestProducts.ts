@@ -38,6 +38,7 @@ Suggest 6–8 shoppable products that would help a reader recreate or be inspire
 
 TIER GUIDANCE:
 - "original_era" = genuine vintage items actually from this period (Etsy vintage listings described as "true vintage", "1920s vintage", "antique", items from specialist antique sellers). Rarer. Bias toward Etsy, network "etsy".
+- "vintage_pre_owned" = actual secondhand/pre-owned vintage items not necessarily from the exact era but genuinely old (ThredUp, Depop, Poshmark, Etsy secondhand). Bias toward Etsy, network "etsy".
 - "vintage_reproduction" = made today in period style (Etsy reproductions, costume-adjacent, modern makers working in period silhouettes, items described as "1920s style" or "flapper style"). Bias toward Etsy, network "etsy".
 - "modern_inspired" = contemporary pieces that evoke the look without being period-styled (modern slip dress, current oxford shirt, mainstream retailer pieces). Bias toward Amazon/Nordstrom, network "amazon" or "nordstrom".
 
@@ -45,10 +46,10 @@ For each product include:
 - "title": descriptive product name (what to search for)
 - "retailer": e.g. "Etsy", "Amazon", "Nordstrom"
 - "network": one of "etsy", "amazon", "nordstrom", "direct"
-- "match_tier": one of "original_era", "vintage_reproduction", "modern_inspired"
+- "match_tier": one of "original_era", "vintage_pre_owned", "vintage_reproduction", "modern_inspired"
 - "search_hint": 4–8 word search query to find this item
 
-Bias the mix: 1–2 original_era, 2–3 vintage_reproduction, 2–3 modern_inspired.
+Bias the mix: 1–2 original_era, 1–2 vintage_pre_owned, 1–2 vintage_reproduction, 2–3 modern_inspired.
 
 Respond with valid JSON only, no markdown fences:
 {"suggestions":[{"title":"...","retailer":"...","network":"...","match_tier":"...","search_hint":"..."}]}`;
@@ -64,6 +65,12 @@ Respond with valid JSON only, no markdown fences:
     const mediaType = contentType.split(";")[0].trim() as
       | "image/jpeg" | "image/png" | "image/gif" | "image/webp";
     const buffer = await imgRes.arrayBuffer();
+    if (buffer.byteLength > 4.5 * 1024 * 1024) {
+      return {
+        success: false,
+        error: `Image is too large (${(buffer.byteLength / 1024 / 1024).toFixed(1)} MB — max 5 MB). Use a smaller Wikimedia thumbnail URL.`,
+      };
+    }
     const base64 = Buffer.from(buffer).toString("base64");
 
     const response = await client.messages.create({
