@@ -83,6 +83,7 @@ export default function HomeClient({
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [visibleStarId, setVisibleStarId] = useState<string | null>(null);
   const [thumbsVisible, setThumbsVisible] = useState(true);
+  const [hoveredLookId, setHoveredLookId] = useState<string | null>(null);
   const productsRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
 
@@ -168,6 +169,13 @@ export default function HomeClient({
     (l) => l.star_id === teaserStarId && l.products && l.products.length > 0
   ) ?? looks.find((l) => l.products && l.products.length > 0) ?? null;
   const teaserProducts = teaserLook ? sortedProducts(teaserLook.products).slice(0, 6) : [];
+  // On desktop hover: override ghost bar with the hovered look's products
+  const hoveredLook = hoveredLookId ? (looks.find((l) => l.id === hoveredLookId) ?? null) : null;
+  const hoveredProducts = hoveredLook && hoveredLook.products.length > 0
+    ? sortedProducts(hoveredLook.products).slice(0, 6)
+    : null;
+  const activeTeaserLook = (expandedLookId === null && hoveredProducts) ? hoveredLook : teaserLook;
+  const activeTeaserProducts = (expandedLookId === null && hoveredProducts) ? hoveredProducts : teaserProducts;
   // First look of whichever star section is currently on screen — shimmer follows scroll
   const firstLookId = (() => {
     const starId = visibleStarId ?? stars[0]?.id;
@@ -223,6 +231,8 @@ export default function HomeClient({
                       <button
                         key={look.id}
                         onClick={() => toggleLook(look.id)}
+                        onMouseEnter={() => expandedLookId === null && setHoveredLookId(look.id)}
+                        onMouseLeave={() => setHoveredLookId(null)}
                         className="group block text-left shrink-0 w-44 md:w-52"
                       >
                         <div
@@ -368,17 +378,17 @@ export default function HomeClient({
           /* ── Teaser mode: ghost boxes + nudge label ── */
           <>
             <button
-              onClick={() => teaserLook && toggleLook(teaserLook.id)}
+              onClick={() => activeTeaserLook && toggleLook(activeTeaserLook.id)}
               className="product-strip__teaser-btn"
               tabIndex={stripVisible ? 0 : -1}
             >
               Tap to Shop
             </button>
             <div className={`product-strip__thumbs${thumbsVisible ? "" : " product-strip__thumbs--fading"}`}>
-              {teaserProducts.map((product, index) => (
+              {activeTeaserProducts.map((product, index) => (
                 <button
                   key={product.id}
-                  onClick={() => teaserLook && toggleLook(teaserLook.id)}
+                  onClick={() => activeTeaserLook && toggleLook(activeTeaserLook.id)}
                   className={`product-strip__ghost${index === 0 ? " product-strip__ghost--active" : ""}`}
                   tabIndex={stripVisible ? 0 : -1}
                 >
