@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import type { MatchTier } from "@/app/components/ProductFrame";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -289,23 +290,27 @@ function ProductCard({ product: p }: { product: BrowseProduct }) {
           {p.size && <> · <span className="font-medium">Size {p.size}</span></>}
         </p>
 
-        {/* Look context */}
-        <div className="mt-auto pt-2.5 border-t border-navy/10 flex items-center gap-2">
+        {/* Look context — links to the look detail page */}
+        <Link
+          href={`/star/${p.star.slug}/${p.look.slug}`}
+          className="mt-auto pt-2.5 border-t border-navy/10 flex items-center gap-2 group hover:opacity-80 transition-opacity"
+          title={`View full look: ${p.look.title}`}
+        >
           {p.look.image_url && (
             <img
               src={p.look.image_url}
               alt={p.look.title}
-              className="w-7 h-7 object-cover flex-shrink-0 opacity-60 grayscale"
+              className="w-7 h-7 object-cover flex-shrink-0 opacity-60 grayscale group-hover:opacity-80 transition-opacity"
               loading="lazy"
             />
           )}
           <div className="min-w-0">
             <p className="text-[10px] text-navy/50 leading-tight truncate">{p.star.name}</p>
-            <p className="text-[10px] text-navy/35 leading-tight truncate italic">
-              {p.look.title}{yearDisplay ? `, ${yearDisplay}` : ""}
+            <p className="text-[10px] text-navy/35 leading-tight truncate italic group-hover:text-brass/60 transition-colors">
+              {p.look.title}{yearDisplay ? `, ${yearDisplay}` : ""} ↗
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* CTA */}
         <a
