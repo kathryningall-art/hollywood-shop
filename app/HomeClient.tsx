@@ -10,6 +10,7 @@ type Product = {
   retailer: string;
   image_url: string | null;
   price_display: string | null;
+  size: string | null;
   affiliate_url: string;
   network: string;
   display_order: number;
@@ -327,6 +328,9 @@ export default function HomeClient({
                             </p>
                             {product.price_display && (
                               <p className="text-navy/50 text-xs mb-1">{product.price_display}</p>
+                            )}
+                            {product.size && (
+                              <p className="text-navy/50 text-xs mb-1">Size: {product.size}</p>
                             )}
                             <p className="text-navy/35 text-[10px] uppercase tracking-widest mb-2">
                               {TIER_SHORT[product.match_tier ?? "modern_inspired"]}

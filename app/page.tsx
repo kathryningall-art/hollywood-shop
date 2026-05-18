@@ -13,7 +13,7 @@ export default async function HomePage() {
       .from("looks")
       .select(`
         id, star_id, slug, title, year, year_display, display_order, image_url, image_credit, image_source_url, editorial_text,
-        products(id, title, retailer, image_url, price_display, affiliate_url, network, display_order, match_tier)
+        products(id, title, retailer, image_url, price_display, size, affiliate_url, network, display_order, match_tier)
       `)
       .eq("published", true)
       .order("display_order"),

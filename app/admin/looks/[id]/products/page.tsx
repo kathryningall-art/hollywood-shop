@@ -13,6 +13,7 @@ type Product = {
   retailer: string;
   image_url: string;
   price_display: string;
+  size: string;
   affiliate_url: string;
   network: string;
   display_order: number;
@@ -41,6 +42,7 @@ const EMPTY_PRODUCT = {
   retailer: "",
   image_url: "",
   price_display: "",
+  size: "",
   affiliate_url: "",
   network: "etsy",
   display_order: 0,
@@ -107,6 +109,7 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
       retailer: p.retailer,
       image_url: p.image_url ?? "",
       price_display: p.price_display ?? "",
+      size: p.size ?? "",
       affiliate_url: p.affiliate_url,
       network: p.network,
       display_order: p.display_order,
@@ -132,6 +135,7 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
       retailer: form.retailer,
       image_url: form.image_url || "",
       price_display: form.price_display || null,
+      size: form.size || null,
       affiliate_url: form.affiliate_url,
       network: form.network,
       display_order: form.display_order,
@@ -422,6 +426,18 @@ function ProductForm({
             className={input}
             placeholder="e.g. $42"
           />
+        </div>
+
+        <div>
+          <label className={label}>Size <span className="text-navy/30 normal-case tracking-normal font-sans">(optional)</span></label>
+          <input
+            type="text"
+            value={form.size}
+            onChange={(e) => set("size", e.target.value)}
+            className={input}
+            placeholder="e.g. S, M, US 8, 28W, One Size"
+          />
+          <p className="text-navy/40 text-xs mt-1.5">Use for one-of-a-kind vintage items with a specific size. Will be filterable in future.</p>
         </div>
 
         <div>
