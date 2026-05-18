@@ -52,6 +52,9 @@ export default function RootLayout({
               <Link href="/" className="hover:text-navy transition-colors px-3">
                 Collections
               </Link>
+              <Link href="/browse" className="hover:text-navy transition-colors px-3">
+                Browse
+              </Link>
             </nav>
           </div>
         </header>
