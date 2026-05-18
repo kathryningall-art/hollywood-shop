@@ -46,7 +46,6 @@ const networkLabel: Record<string, string> = {
   shareasale: "ShareASale",
   impact: "Impact",
   rakuten: "Rakuten",
-  direct: "Shop",
 };
 
 const TIER_ORDER: Record<MatchTier, number> = {
