@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { FrameSwatch, type MatchTier } from "@/app/components/ProductFrame";
 import { suggestProducts, type ProductSuggestion } from "@/app/actions/suggestProducts";
+import { importProductsFromUrls, type ImportedProduct } from "@/app/actions/importProducts";
 
 type Product = {
   id: string;
@@ -64,6 +65,9 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
   const [suggesting, setSuggesting] = useState(false);
   const [suggestions, setSuggestions] = useState<ProductSuggestion[] | null>(null);
   const [suggestError, setSuggestError] = useState("");
+
+  // Bulk import state
+  const [bulkMode, setBulkMode] = useState(false);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -261,13 +265,19 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
         )}
       </div>
 
-      {editingId === null && (
+      {editingId === null && !bulkMode && (
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={() => startNew()}
             className="bg-navy text-cream text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass transition-colors"
           >
             + Add Product
+          </button>
+          <button
+            onClick={() => { setBulkMode(true); setSuggestions(null); }}
+            className="bg-navy text-cream text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass transition-colors"
+          >
+            ↓ Bulk Import from URLs
           </button>
           <button
             onClick={handleSuggest}
@@ -278,6 +288,18 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
             {suggesting ? "Suggesting…" : "Suggest Products"}
           </button>
         </div>
+      )}
+
+      {bulkMode && editingId === null && (
+        <BulkImportPanel
+          lookId={lookId}
+          startOrder={Math.max(0, ...products.map((p) => p.display_order)) + 1}
+          onImported={(newProds) => {
+            setProducts((prev) => [...prev, ...newProds]);
+            setBulkMode(false);
+          }}
+          onClose={() => setBulkMode(false)}
+        />
       )}
 
       {suggestError && <p className="mt-3 text-red-600 text-sm">{suggestError}</p>}
@@ -480,6 +502,207 @@ function ProductForm({
           Cancel
         </button>
       </div>
+    </div>
+  );
+}
+
+// ─── Bulk Import Panel ────────────────────────────────────────────
+
+type PreviewItem = ImportedProduct & { selected: boolean };
+
+function BulkImportPanel({
+  lookId,
+  startOrder,
+  onImported,
+  onClose,
+}: {
+  lookId: string;
+  startOrder: number;
+  onImported: (products: Product[]) => void;
+  onClose: () => void;
+}) {
+  const [rawUrls, setRawUrls] = useState("");
+  const [fetching, setFetching] = useState(false);
+  const [previews, setPreviews] = useState<PreviewItem[] | null>(null);
+  const [fetchError, setFetchError] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+
+  async function handleFetch() {
+    const urls = rawUrls
+      .split("\n")
+      .map((u) => u.trim())
+      .filter((u) => u.startsWith("http"));
+    if (!urls.length) { setFetchError("Paste at least one URL starting with http."); return; }
+    if (urls.length > 15) { setFetchError("Maximum 15 URLs at a time."); return; }
+    setFetching(true);
+    setFetchError("");
+    setPreviews(null);
+    const results = await importProductsFromUrls(urls);
+    setPreviews(results.map((r) => ({ ...r, selected: !r.error })));
+    setFetching(false);
+  }
+
+  function update(i: number, patch: Partial<PreviewItem>) {
+    setPreviews((prev) => prev!.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+  }
+
+  async function handleImport() {
+    const selected = previews!.filter((p) => p.selected && !p.error);
+    if (!selected.length) return;
+    setImporting(true);
+    setImportError("");
+    const supabase = createClient();
+    const rows = selected.map((p, i) => ({
+      look_id: lookId,
+      title: p.title ?? "(untitled — edit me)",
+      retailer: p.retailer,
+      network: p.network,
+      match_tier: p.match_tier,
+      affiliate_url: p.url,
+      image_url: p.image_url ?? null,
+      price_display: p.price_display ?? null,
+      size: p.size ?? null,
+      display_order: startOrder + i,
+    }));
+    const { data, error } = await supabase.from("products").insert(rows).select("*");
+    if (error) { setImportError(error.message); setImporting(false); return; }
+    onImported((data ?? []) as unknown as Product[]);
+  }
+
+  const successCount = previews ? previews.filter((p) => p.selected && !p.error).length : 0;
+
+  return (
+    <div className="border border-brass/40 bg-cream/30 p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs tracking-widest uppercase text-navy/50">Bulk Import from URLs</p>
+        <button onClick={onClose} className="text-navy/30 hover:text-navy text-lg leading-none">×</button>
+      </div>
+
+      {/* Step 1 — paste URLs */}
+      {!previews && (
+        <>
+          <p className="text-navy/50 text-xs leading-relaxed">
+            Paste product URLs below — one per line. Works best with Etsy, Poshmark, Nordstrom, ThredUp, and Depop.
+            Amazon usually blocks requests; add those manually.
+          </p>
+          <textarea
+            value={rawUrls}
+            onChange={(e) => setRawUrls(e.target.value)}
+            rows={8}
+            placeholder={"https://www.etsy.com/listing/...\nhttps://poshmark.com/listing/...\nhttps://www.nordstrom.com/..."}
+            className="w-full border border-navy/20 px-3 py-2 text-navy text-sm focus:outline-none focus:border-brass bg-white font-mono resize-y"
+          />
+          {fetchError && <p className="text-red-600 text-sm">{fetchError}</p>}
+          <div className="flex gap-3">
+            <button
+              onClick={handleFetch}
+              disabled={fetching || !rawUrls.trim()}
+              className="bg-navy text-cream text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass transition-colors disabled:opacity-50"
+            >
+              {fetching ? "Fetching…" : "Fetch Products"}
+            </button>
+            <button onClick={onClose} className="text-xs tracking-widest uppercase text-navy/40 hover:text-navy px-4 py-3">
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Step 2 — preview & confirm */}
+      {previews && (
+        <>
+          <div className="space-y-2">
+            {previews.map((item, i) => (
+              <div
+                key={i}
+                className={`border px-3 py-3 flex items-start gap-3 ${
+                  item.error
+                    ? "border-red-200 bg-red-50/40 opacity-70"
+                    : item.selected
+                    ? "border-navy/15 bg-white"
+                    : "border-navy/10 bg-white opacity-50"
+                }`}
+              >
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  checked={item.selected && !item.error}
+                  disabled={!!item.error}
+                  onChange={() => update(i, { selected: !item.selected })}
+                  className="mt-1 accent-navy flex-shrink-0"
+                />
+
+                {/* Thumbnail */}
+                <div className="w-12 h-12 flex-shrink-0 bg-cream/60 overflow-hidden">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-navy/20 text-lg">✗</div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  {item.error ? (
+                    <p className="text-red-600 text-xs">{item.error}</p>
+                  ) : (
+                    <>
+                      {/* Editable title */}
+                      <input
+                        type="text"
+                        value={item.title ?? ""}
+                        onChange={(e) => update(i, { title: e.target.value })}
+                        className="w-full text-navy text-sm font-medium border-0 border-b border-transparent hover:border-navy/20 focus:border-brass focus:outline-none bg-transparent py-0"
+                      />
+                      <p className="text-navy/50 text-xs">
+                        {item.retailer}
+                        {item.price_display && <> · {item.price_display}</>}
+                        {item.size && <> · Size {item.size}</>}
+                      </p>
+                    </>
+                  )}
+                  <p className="text-navy/30 text-[10px] truncate">{item.url}</p>
+                </div>
+
+                {/* Tier selector */}
+                {!item.error && (
+                  <select
+                    value={item.match_tier}
+                    onChange={(e) => update(i, { match_tier: e.target.value as MatchTier })}
+                    className="text-xs border border-navy/15 px-2 py-1 text-navy/70 bg-white focus:outline-none focus:border-brass flex-shrink-0"
+                  >
+                    {TIER_OPTIONS.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {importError && <p className="text-red-600 text-sm">{importError}</p>}
+
+          <div className="flex gap-3 items-center flex-wrap">
+            <button
+              onClick={handleImport}
+              disabled={importing || successCount === 0}
+              className="bg-navy text-cream text-xs tracking-widest uppercase px-6 py-3 hover:bg-brass transition-colors disabled:opacity-50"
+            >
+              {importing ? "Importing…" : `Import ${successCount} Product${successCount !== 1 ? "s" : ""}`}
+            </button>
+            <button
+              onClick={() => { setPreviews(null); setRawUrls(""); }}
+              className="text-xs tracking-widest uppercase text-navy/40 hover:text-navy px-4 py-3"
+            >
+              ← Try different URLs
+            </button>
+            <button onClick={onClose} className="text-xs tracking-widest uppercase text-navy/30 hover:text-navy px-4 py-3">
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
