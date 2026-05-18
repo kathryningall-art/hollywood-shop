@@ -7,26 +7,6 @@ export default function ProductFrame({
   tier: MatchTier;
   children: React.ReactNode;
 }) {
-  if (tier === "original_era") {
-    return (
-      <div className="frame-original-era">
-        {children}
-        <span className="corner-bl" />
-        <span className="corner-br" />
-      </div>
-    );
-  }
-  if (tier === "vintage_reproduction") {
-    return (
-      <div className="frame-vintage-repro">
-        {children}
-        <span className="zig-tl-1" /><span className="zig-tl-2" /><span className="zig-tl-3" />
-        <span className="zig-tr-1" /><span className="zig-tr-2" /><span className="zig-tr-3" />
-        <span className="zig-bl-1" /><span className="zig-bl-2" /><span className="zig-bl-3" />
-        <span className="zig-br-1" /><span className="zig-br-2" /><span className="zig-br-3" />
-      </div>
-    );
-  }
   return <div className="frame-modern">{children}</div>;
 }
 

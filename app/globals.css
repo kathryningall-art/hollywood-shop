@@ -311,6 +311,7 @@ h4 {
   border-radius: 2px;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
 }
 @media (min-width: 768px) {
   .product-strip__ghost {

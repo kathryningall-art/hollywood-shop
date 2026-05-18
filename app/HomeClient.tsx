@@ -372,9 +372,11 @@ export default function HomeClient({
             </span>
             <div className={`product-strip__thumbs${thumbsVisible ? "" : " product-strip__thumbs--fading"}`}>
               {teaserProducts.map((product, index) => (
-                <div
+                <button
                   key={product.id}
+                  onClick={() => teaserLook && toggleLook(teaserLook.id)}
                   className={`product-strip__ghost${index === 0 ? " product-strip__ghost--active" : ""}`}
+                  tabIndex={stripVisible ? 0 : -1}
                 >
                   {product.image_url && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -384,7 +386,7 @@ export default function HomeClient({
                       className="w-full h-full object-cover"
                     />
                   )}
-                </div>
+                </button>
               ))}
             </div>
           </>
