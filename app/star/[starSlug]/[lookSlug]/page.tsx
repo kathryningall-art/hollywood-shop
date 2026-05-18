@@ -173,7 +173,7 @@ export default async function LookPage({
           <img
             src={look.image_url}
             alt={`${star.name} — ${look.title}`}
-            className="w-full object-cover max-h-[600px]"
+            className="w-full h-auto"
           />
           {(look.image_credit || look.image_source_url) && (
             <p className="text-navy/30 text-[10px] mt-1.5 tracking-wide">
