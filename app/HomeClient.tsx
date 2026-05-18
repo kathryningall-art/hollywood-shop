@@ -367,9 +367,13 @@ export default function HomeClient({
         {showTeaser ? (
           /* ── Teaser mode: ghost boxes + nudge label ── */
           <>
-            <span className="product-strip__teaser-label">
-              ↑ Tap a look to shop it
-            </span>
+            <button
+              onClick={() => teaserLook && toggleLook(teaserLook.id)}
+              className="product-strip__teaser-btn"
+              tabIndex={stripVisible ? 0 : -1}
+            >
+              Tap to Shop
+            </button>
             <div className={`product-strip__thumbs${thumbsVisible ? "" : " product-strip__thumbs--fading"}`}>
               {teaserProducts.map((product, index) => (
                 <button

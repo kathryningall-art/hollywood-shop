@@ -228,8 +228,13 @@ h4 {
 }
 /* Teaser variant: slightly more transparent, softer border */
 .product-strip--teaser {
-  background: rgba(241, 233, 212, 0.76);
-  border-top-color: rgba(184, 150, 78, 0.14);
+  background: rgba(241, 233, 212, 0.97);
+  border-top: 2px solid rgba(184, 150, 78, 0.6);
+  animation: strip-glow 2.4s ease-in-out infinite;
+}
+@keyframes strip-glow {
+  0%, 100% { box-shadow: 0 -4px 16px rgba(27, 42, 74, 0.08), 0 -2px 14px rgba(184, 150, 78, 0.15); }
+  50%       { box-shadow: 0 -6px 28px rgba(27, 42, 74, 0.12), 0 -4px 22px rgba(184, 150, 78, 0.40); }
 }
 @media (min-width: 768px) {
   .product-strip {
@@ -342,13 +347,27 @@ h4 {
   background: rgba(241, 233, 212, 0.72);
 }
 
-/* Nudge label shown in teaser mode */
-.product-strip__teaser-label {
-  font-family: var(--font-serif);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #1b2a4a;
-  white-space: nowrap;
+/* Tap to Shop button in teaser mode */
+.product-strip__teaser-btn {
   flex-shrink: 0;
+  background: #1b2a4a;
+  color: #F1E9D4;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0.6rem 1rem;
+  border-radius: 2px;
+  animation: tap-bounce 1.8s ease-in-out infinite;
+  cursor: pointer;
+}
+.product-strip__teaser-btn:hover {
+  background: #b8964e;
+}
+@keyframes tap-bounce {
+  0%, 100% { transform: translateY(0); }
+  45%       { transform: translateY(-5px); }
+  65%       { transform: translateY(-3px); }
 }
