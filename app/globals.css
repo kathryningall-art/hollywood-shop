@@ -161,13 +161,14 @@ h4 {
 }
 
 /* Push footer above the floating product strip when it's visible.
-   margin-bottom on the footer itself creates the exact gap needed. */
+   Extra margin below the footer creates scrollable space so the entire
+   footer clears the strip height when the user scrolls to the bottom. */
 body.strip-active footer {
-  margin-bottom: 156px;
+  margin-bottom: 320px;
 }
 @media (min-width: 768px) {
   body.strip-active footer {
-    margin-bottom: 204px;
+    margin-bottom: 380px;
   }
 }
 
