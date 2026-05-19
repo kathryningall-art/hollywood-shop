@@ -17,12 +17,17 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.biascutbureau.com"),
   title: {
     default: "Bias Cut Bureau — Classic Hollywood Style",
     template: "%s | Bias Cut Bureau",
   },
   description:
     "Shop the looks of classic Hollywood's golden age — public-domain imagery, modern pieces inspired by the screen sirens of 1915–1969.",
+  openGraph: {
+    siteName: "Bias Cut Bureau",
+    url: "https://www.biascutbureau.com",
+  },
 };
 
 export default function RootLayout({
