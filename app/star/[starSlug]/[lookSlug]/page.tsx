@@ -159,7 +159,7 @@ export default async function LookPage({
       </div>
 
       {/* Look header */}
-      <p className="text-brass tracking-[0.2em] uppercase text-xs mb-2">{star.name}</p>
+      <p className="font-sc text-brass tracking-[0.2em] uppercase text-xs mb-2">{star.name}</p>
       <h1 className="font-serif text-navy text-3xl md:text-4xl mb-1 leading-snug">
         {look.title}
       </h1>

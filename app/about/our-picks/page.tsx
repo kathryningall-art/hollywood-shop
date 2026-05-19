@@ -20,7 +20,7 @@ function TierExample({ tier }: { tier: "vintage" | "pre_owned" | "reproduction" 
 export default function OurPicksPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-16 md:py-24">
-      <p className="text-brass tracking-[0.2em] uppercase text-xs mb-2">Editorial</p>
+      <p className="font-sc text-brass tracking-[0.2em] uppercase text-xs mb-2">Editorial</p>
       <h1 className="font-serif text-navy text-3xl md:text-4xl mb-4 leading-snug">
         About Our Picks
       </h1>
@@ -35,7 +35,7 @@ export default function OurPicksPage() {
           <TierExample tier="vintage" />
           <div>
             <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Vintage</h2>
-            <p className="text-brass text-xs tracking-widest uppercase">Antique</p>
+            <p className="font-sc text-brass text-xs tracking-widest uppercase">Antique</p>
           </div>
         </div>
         <p className="text-navy/70 leading-relaxed">
@@ -53,7 +53,7 @@ export default function OurPicksPage() {
           <TierExample tier="pre_owned" />
           <div>
             <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Pre-Owned</h2>
-            <p className="text-brass text-xs tracking-widest uppercase">Pre-Owned</p>
+            <p className="font-sc text-brass text-xs tracking-widest uppercase">Pre-Owned</p>
           </div>
         </div>
         <p className="text-navy/70 leading-relaxed">
@@ -71,7 +71,7 @@ export default function OurPicksPage() {
           <TierExample tier="reproduction" />
           <div>
             <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Reproduction</h2>
-            <p className="text-brass text-xs tracking-widest uppercase">Reproduction</p>
+            <p className="font-sc text-brass text-xs tracking-widest uppercase">Reproduction</p>
           </div>
         </div>
         <p className="text-navy/70 leading-relaxed">
@@ -89,7 +89,7 @@ export default function OurPicksPage() {
           <TierExample tier="modern" />
           <div>
             <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Modern</h2>
-            <p className="text-brass text-xs tracking-widest uppercase">Modern</p>
+            <p className="font-sc text-brass text-xs tracking-widest uppercase">Modern</p>
           </div>
         </div>
         <p className="text-navy/70 leading-relaxed">

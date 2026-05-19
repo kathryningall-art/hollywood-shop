@@ -59,7 +59,7 @@ export default async function StarPage({ params }: Props) {
           )}
         </div>
         <div className="pt-4">
-          <p className="text-brass tracking-widest uppercase text-xs mb-4">
+          <p className="font-sc text-brass tracking-widest uppercase text-xs mb-4">
             Collection
           </p>
           <h1 className="font-serif text-5xl md:text-6xl text-navy mb-6 leading-tight">

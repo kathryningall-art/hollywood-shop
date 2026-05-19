@@ -6,8 +6,9 @@
   --color-brass: #b8964e;
   --color-warm-gray: #8c8070;
   --color-warm-white: #faf8f4;
-  --font-serif: var(--font-playfair);
+  --font-serif: var(--font-bodoni-moda);
   --font-body: var(--font-eb-garamond);
+  --font-sc: var(--font-cormorant-sc);
 }
 
 :root {

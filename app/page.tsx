@@ -44,7 +44,7 @@ export default async function HomePage() {
           <div>
             <div className="flex items-center gap-4 mb-5">
               <div className="h-px w-6 bg-brass/60" />
-              <p className="text-brass tracking-[0.2em] uppercase text-xs">
+              <p className="font-sc text-brass tracking-[0.2em] uppercase text-xs">
                 The Approach
               </p>
             </div>

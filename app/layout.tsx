@@ -1,18 +1,27 @@
 import type { Metadata } from "next";
-import { Playfair_Display, EB_Garamond } from "next/font/google";
+import { Bodoni_Moda, EB_Garamond, Cormorant_SC } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
+import Footer from "@/app/components/Footer";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const bodoniModa = Bodoni_Moda({
+  variable: "--font-bodoni-moda",
   subsets: ["latin"],
   display: "swap",
+  style: ["normal", "italic"],
 });
 
 const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const cormorantSC = Cormorant_SC({
+  variable: "--font-cormorant-sc",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -38,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${ebGaramond.variable} h-full`}
+      className={`${bodoniModa.variable} ${ebGaramond.variable} ${cormorantSC.variable} h-full`}
     >
       <body className="min-h-full flex flex-col bg-cream text-navy">
         <header className="border-b border-navy/10 bg-cream sticky top-0 z-50">
@@ -66,33 +75,7 @@ export default function RootLayout({
 
         <main className="flex-1">{children}</main>
 
-        <footer className="border-t border-navy/10 bg-navy text-cream/70 mt-24">
-          <div className="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-8 text-sm">
-            <div>
-              <p className="font-serif text-cream text-base mb-2">
-                Bias Cut Bureau
-              </p>
-              <p className="leading-relaxed">
-                A curated editorial celebrating the style of classic Hollywood,
-                1915–1969. All celebrity imagery is public domain or Creative
-                Commons licensed.
-              </p>
-            </div>
-            <div>
-              <p className="text-cream/50 text-xs leading-relaxed">
-                As an Amazon Associate and affiliate partner, we earn from
-                qualifying purchases made through links on this site. This
-                supports the research and editorial work behind every look.
-                Affiliate links are marked with{" "}
-                <span className="text-brass">↗</span> and carry{" "}
-                <code className="text-xs">rel=&quot;sponsored nofollow&quot;</code>.{" "}
-                <Link href="/about/our-picks" className="underline hover:text-cream/80 transition-colors">
-                  About our picks ↗
-                </Link>
-              </p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </body>
     </html>
   );

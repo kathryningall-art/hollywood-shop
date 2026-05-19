@@ -124,7 +124,7 @@ export default async function LookPage({ params }: Props) {
 
           {/* Right: editorial + products */}
           <div>
-            <p className="text-brass tracking-widest uppercase text-xs mb-4">
+            <p className="font-sc text-brass tracking-widest uppercase text-xs mb-4">
               {look.year}
             </p>
             <h1 className="font-serif text-4xl md:text-5xl text-navy mb-8 leading-tight">
