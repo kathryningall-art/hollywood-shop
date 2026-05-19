@@ -30,6 +30,9 @@ export default function AdminNav({ email }: { email: string }) {
             <Link href="/admin/looks/new" className="hover:text-brass transition-colors">
               Add Look
             </Link>
+            <Link href="/admin/data-quality" className="hover:text-brass transition-colors">
+              Data Quality
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4 text-xs text-cream/60">

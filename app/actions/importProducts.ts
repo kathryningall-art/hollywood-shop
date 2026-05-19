@@ -17,16 +17,16 @@ export type ImportedProduct = {
 // ─── Site detection ───────────────────────────────────────────────
 
 const SITE_MAP: Array<{ host: string; retailer: string; network: string; tier: MatchTier }> = [
-  { host: "etsy.com",       retailer: "Etsy",       network: "etsy",      tier: "vintage_reproduction" },
-  { host: "amazon.com",     retailer: "Amazon",     network: "amazon",    tier: "modern_inspired" },
-  { host: "nordstrom.com",  retailer: "Nordstrom",  network: "nordstrom", tier: "modern_inspired" },
-  { host: "poshmark.com",   retailer: "Poshmark",   network: "direct",    tier: "vintage_pre_owned" },
-  { host: "thredup.com",    retailer: "ThredUp",    network: "direct",    tier: "vintage_pre_owned" },
-  { host: "depop.com",      retailer: "Depop",      network: "direct",    tier: "vintage_pre_owned" },
-  { host: "ebay.com",       retailer: "eBay",       network: "direct",    tier: "vintage_pre_owned" },
-  { host: "asos.com",       retailer: "ASOS",       network: "direct",    tier: "modern_inspired" },
-  { host: "modcloth.com",   retailer: "ModCloth",   network: "direct",    tier: "vintage_reproduction" },
-  { host: "shopbop.com",    retailer: "Shopbop",    network: "direct",    tier: "modern_inspired" },
+  { host: "etsy.com",       retailer: "Etsy",       network: "etsy",      tier: "reproduction" },
+  { host: "amazon.com",     retailer: "Amazon",     network: "amazon",    tier: "modern" },
+  { host: "nordstrom.com",  retailer: "Nordstrom",  network: "nordstrom", tier: "modern" },
+  { host: "poshmark.com",   retailer: "Poshmark",   network: "direct",    tier: "pre_owned" },
+  { host: "thredup.com",    retailer: "ThredUp",    network: "direct",    tier: "pre_owned" },
+  { host: "depop.com",      retailer: "Depop",      network: "direct",    tier: "pre_owned" },
+  { host: "ebay.com",       retailer: "eBay",       network: "direct",    tier: "pre_owned" },
+  { host: "asos.com",       retailer: "ASOS",       network: "direct",    tier: "modern" },
+  { host: "modcloth.com",   retailer: "ModCloth",   network: "direct",    tier: "reproduction" },
+  { host: "shopbop.com",    retailer: "Shopbop",    network: "direct",    tier: "modern" },
 ];
 
 function detectSite(url: string) {
@@ -37,7 +37,7 @@ function detectSite(url: string) {
   return {
     retailer: name.charAt(0).toUpperCase() + name.slice(1),
     network: "direct",
-    tier: "modern_inspired" as MatchTier,
+    tier: "modern" as MatchTier,
   };
 }
 
@@ -184,7 +184,7 @@ export async function importProductsFromUrls(urls: string[]): Promise<ImportedPr
   return settled.map((r) =>
     r.status === "fulfilled" ? r.value : {
       url: "", title: null, retailer: "Unknown", network: "direct",
-      match_tier: "modern_inspired" as MatchTier,
+      match_tier: "modern" as MatchTier,
       image_url: null, price_display: null, size: null, error: "Unexpected error",
     }
   );

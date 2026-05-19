@@ -61,17 +61,17 @@ const URLS = [
 // ─── Retailer / network / tier detection ─────────────────────────
 
 const SITE_MAP = [
-  { host: "etsy.com",       retailer: "Etsy",       network: "etsy",      tier: "vintage_reproduction" },
-  { host: "amazon.com",     retailer: "Amazon",     network: "amazon",    tier: "modern_inspired" },
-  { host: "nordstrom.com",  retailer: "Nordstrom",  network: "nordstrom", tier: "modern_inspired" },
-  { host: "poshmark.com",   retailer: "Poshmark",   network: "direct",    tier: "vintage_pre_owned" },
-  { host: "thredup.com",    retailer: "ThredUp",    network: "direct",    tier: "vintage_pre_owned" },
-  { host: "depop.com",      retailer: "Depop",      network: "direct",    tier: "vintage_pre_owned" },
-  { host: "ebay.com",       retailer: "eBay",       network: "direct",    tier: "vintage_pre_owned" },
-  { host: "asos.com",       retailer: "ASOS",       network: "direct",    tier: "modern_inspired" },
-  { host: "modcloth.com",   retailer: "ModCloth",   network: "direct",    tier: "vintage_reproduction" },
-  { host: "shopbop.com",    retailer: "Shopbop",    network: "direct",    tier: "modern_inspired" },
-  { host: "net-a-porter.com",retailer: "Net-a-Porter",network: "direct",  tier: "modern_inspired" },
+  { host: "etsy.com",        retailer: "Etsy",          network: "etsy",      tier: "reproduction" },
+  { host: "amazon.com",      retailer: "Amazon",        network: "amazon",    tier: "modern" },
+  { host: "nordstrom.com",   retailer: "Nordstrom",     network: "nordstrom", tier: "modern" },
+  { host: "poshmark.com",    retailer: "Poshmark",      network: "direct",    tier: "pre_owned" },
+  { host: "thredup.com",     retailer: "ThredUp",       network: "direct",    tier: "pre_owned" },
+  { host: "depop.com",       retailer: "Depop",         network: "direct",    tier: "pre_owned" },
+  { host: "ebay.com",        retailer: "eBay",          network: "direct",    tier: "pre_owned" },
+  { host: "asos.com",        retailer: "ASOS",          network: "direct",    tier: "modern" },
+  { host: "modcloth.com",    retailer: "ModCloth",      network: "direct",    tier: "reproduction" },
+  { host: "shopbop.com",     retailer: "Shopbop",       network: "direct",    tier: "modern" },
+  { host: "net-a-porter.com",retailer: "Net-a-Porter",  network: "direct",    tier: "modern" },
 ];
 
 function siteInfo(url) {
@@ -83,7 +83,7 @@ function siteInfo(url) {
   return {
     retailer: name.charAt(0).toUpperCase() + name.slice(1),
     network: "direct",
-    tier: "modern_inspired",
+    tier: "modern",
   };
 }
 

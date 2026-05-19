@@ -60,17 +60,17 @@ const NETWORK_LABEL: Record<string, string> = {
 };
 
 const TIER_LABEL: Record<MatchTier, string> = {
-  original_era: "Antique",
-  vintage_pre_owned: "Pre-Owned",
-  vintage_reproduction: "Reproduction",
-  modern_inspired: "Modern",
+  vintage:      "Vintage",
+  pre_owned:    "Pre-Owned",
+  reproduction: "Reproduction",
+  modern:       "Modern",
 };
 
 const TIER_ACCENT: Record<MatchTier, string> = {
-  original_era: "border-[#B89752] text-[#B89752]",
-  vintage_pre_owned: "border-[#8B6F47] text-[#8B6F47]",
-  vintage_reproduction: "border-[#735834] text-[#735834]",
-  modern_inspired: "border-navy/40 text-navy/50",
+  vintage:      "border-[#B89752] text-[#B89752]",
+  pre_owned:    "border-[#8B6F47] text-[#8B6F47]",
+  reproduction: "border-[#735834] text-[#735834]",
+  modern:       "border-navy/40 text-navy/50",
 };
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────

@@ -4,10 +4,10 @@ import ProductFrame from "@/app/components/ProductFrame";
 export const metadata: Metadata = {
   title: "About Our Picks",
   description:
-    "How Bias Cut Bureau classifies every product recommendation — Original Era, Vintage Reproduction, and Modern Inspired.",
+    "How Bias Cut Bureau classifies every product recommendation — Vintage, Reproduction, and Modern.",
 };
 
-function TierExample({ tier }: { tier: "original_era" | "vintage_pre_owned" | "vintage_reproduction" | "modern_inspired" }) {
+function TierExample({ tier }: { tier: "vintage" | "pre_owned" | "reproduction" | "modern" }) {
   return (
     <div style={{ width: 60 }}>
       <ProductFrame tier={tier}>
@@ -32,9 +32,9 @@ export default function OurPicksPage() {
       {/* Tier 1 */}
       <div className="mb-14">
         <div className="flex items-start gap-6 mb-5">
-          <TierExample tier="original_era" />
+          <TierExample tier="vintage" />
           <div>
-            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Original Era</h2>
+            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Vintage</h2>
             <p className="text-brass text-xs tracking-widest uppercase">Antique</p>
           </div>
         </div>
@@ -50,9 +50,9 @@ export default function OurPicksPage() {
       {/* Tier 2 */}
       <div className="mb-14">
         <div className="flex items-start gap-6 mb-5">
-          <TierExample tier="vintage_pre_owned" />
+          <TierExample tier="pre_owned" />
           <div>
-            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Vintage / Pre-Owned</h2>
+            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Pre-Owned</h2>
             <p className="text-brass text-xs tracking-widest uppercase">Pre-Owned</p>
           </div>
         </div>
@@ -68,9 +68,9 @@ export default function OurPicksPage() {
       {/* Tier 3 */}
       <div className="mb-14">
         <div className="flex items-start gap-6 mb-5">
-          <TierExample tier="vintage_reproduction" />
+          <TierExample tier="reproduction" />
           <div>
-            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Vintage Reproduction</h2>
+            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Reproduction</h2>
             <p className="text-brass text-xs tracking-widest uppercase">Reproduction</p>
           </div>
         </div>
@@ -86,9 +86,9 @@ export default function OurPicksPage() {
       {/* Tier 4 */}
       <div className="mb-14">
         <div className="flex items-start gap-6 mb-5">
-          <TierExample tier="modern_inspired" />
+          <TierExample tier="modern" />
           <div>
-            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Modern Inspired</h2>
+            <h2 className="font-serif text-navy text-xl md:text-2xl mb-1">Modern</h2>
             <p className="text-brass text-xs tracking-widest uppercase">Modern</p>
           </div>
         </div>

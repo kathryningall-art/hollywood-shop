@@ -34,11 +34,11 @@ type BrowseProduct = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const TIER_FILTERS: { value: "all" | MatchTier; label: string }[] = [
-  { value: "all",                 label: "All" },
-  { value: "original_era",        label: "Antique" },
-  { value: "vintage_pre_owned",   label: "Pre-Owned" },
-  { value: "vintage_reproduction",label: "Reproduction" },
-  { value: "modern_inspired",     label: "Modern" },
+  { value: "all",          label: "All" },
+  { value: "vintage",      label: "Vintage" },
+  { value: "pre_owned",    label: "Pre-Owned" },
+  { value: "reproduction", label: "Reproduction" },
+  { value: "modern",       label: "Modern" },
 ];
 
 type PriceBucket = {
@@ -65,18 +65,18 @@ const NETWORK_LABEL: Record<string, string> = {
 };
 
 const TIER_LABEL: Record<MatchTier, string> = {
-  original_era:         "Antique",
-  vintage_pre_owned:    "Pre-Owned",
-  vintage_reproduction: "Reproduction",
-  modern_inspired:      "Modern",
+  vintage:      "Vintage",
+  pre_owned:    "Pre-Owned",
+  reproduction: "Reproduction",
+  modern:       "Modern",
 };
 
 // Left-border accent color per tier
 const TIER_ACCENT: Record<MatchTier, string> = {
-  original_era:         "border-[#B89752] text-[#B89752]",
-  vintage_pre_owned:    "border-[#8B6F47] text-[#8B6F47]",
-  vintage_reproduction: "border-[#735834] text-[#735834]",
-  modern_inspired:      "border-navy/40 text-navy/50",
+  vintage:      "border-[#B89752] text-[#B89752]",
+  pre_owned:    "border-[#8B6F47] text-[#8B6F47]",
+  reproduction: "border-[#735834] text-[#735834]",
+  modern:       "border-navy/40 text-navy/50",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

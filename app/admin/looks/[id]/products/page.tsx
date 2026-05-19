@@ -32,10 +32,10 @@ type LookMeta = {
 const NETWORK_OPTIONS = ["amazon", "etsy", "nordstrom", "shareasale", "impact", "rakuten", "direct"];
 
 const TIER_OPTIONS: { value: MatchTier; label: string; desc: string }[] = [
-  { value: "original_era",         label: "Original Era",         desc: "Genuine vintage from the period" },
-  { value: "vintage_pre_owned",    label: "Vintage / Pre-Owned",  desc: "Actual secondhand vintage item" },
-  { value: "vintage_reproduction", label: "Vintage Reproduction", desc: "Made today in period style" },
-  { value: "modern_inspired",      label: "Modern Inspired",      desc: "Contemporary, inspired by the look" },
+  { value: "vintage",      label: "Vintage",      desc: "Genuine vintage from the period" },
+  { value: "pre_owned",    label: "Pre-Owned",    desc: "Actual secondhand vintage item" },
+  { value: "reproduction", label: "Reproduction", desc: "Made today in period style" },
+  { value: "modern",       label: "Modern",       desc: "Contemporary, inspired by the look" },
 ];
 
 const EMPTY_PRODUCT = {
@@ -47,7 +47,7 @@ const EMPTY_PRODUCT = {
   affiliate_url: "",
   network: "etsy",
   display_order: 0,
-  match_tier: "modern_inspired" as MatchTier,
+  match_tier: "modern" as MatchTier,
 };
 
 export default function ProductsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -117,7 +117,7 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
       affiliate_url: p.affiliate_url,
       network: p.network,
       display_order: p.display_order,
-      match_tier: p.match_tier ?? "modern_inspired",
+      match_tier: p.match_tier ?? "modern",
     });
     setEditingId(p.id);
     setError("");
@@ -238,7 +238,7 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
                 <p className="text-navy/50 text-xs">
                   {p.retailer} · {p.network} · {p.price_display || "no price"} · order {p.display_order}
                 </p>
-                <p className="text-navy/40 text-xs capitalize">{(p.match_tier ?? "modern_inspired").replace(/_/g, " ")}</p>
+                <p className="text-navy/40 text-xs capitalize">{(p.match_tier ?? "modern").replace(/_/g, " ")}</p>
               </div>
               <div className="flex gap-3 flex-shrink-0">
                 <button onClick={() => startEdit(p)} className="text-xs text-brass hover:text-navy uppercase tracking-widest">

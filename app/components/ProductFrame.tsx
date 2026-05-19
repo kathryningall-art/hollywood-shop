@@ -1,4 +1,4 @@
-export type MatchTier = "original_era" | "vintage_pre_owned" | "vintage_reproduction" | "modern_inspired";
+export type MatchTier = "vintage" | "pre_owned" | "reproduction" | "modern";
 
 export default function ProductFrame({
   tier,
@@ -12,8 +12,8 @@ export default function ProductFrame({
 
 /** Tiny swatch for admin tier picker — shows frame styling without a real image */
 export function FrameSwatch({ tier }: { tier: MatchTier }) {
-  const inner = <div style={{ width: "100%", height: "100%", background: "#d6cfc4", borderRadius: tier === "modern_inspired" ? 4 : 0 }} />;
-  if (tier === "original_era") {
+  const inner = <div style={{ width: "100%", height: "100%", background: "#d6cfc4", borderRadius: tier === "modern" ? 4 : 0 }} />;
+  if (tier === "vintage") {
     return (
       <div
         style={{
@@ -27,7 +27,7 @@ export function FrameSwatch({ tier }: { tier: MatchTier }) {
       </div>
     );
   }
-  if (tier === "vintage_reproduction") {
+  if (tier === "reproduction") {
     return (
       <div
         style={{

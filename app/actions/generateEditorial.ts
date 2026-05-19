@@ -50,6 +50,13 @@ Respond with valid JSON only, no markdown fences:
       | "image/gif"
       | "image/webp";
     const buffer = await imgRes.arrayBuffer();
+    const sizeBytes = buffer.byteLength;
+    if (sizeBytes > 4.5 * 1024 * 1024) {
+      return {
+        success: false,
+        error: `Image is too large (${(sizeBytes / 1024 / 1024).toFixed(1)} MB — max 5 MB). Use the Wikimedia thumbnail URL instead: replace the filename in the URL with a smaller version, e.g. add "/640px-" before the filename.`,
+      };
+    }
     const base64 = Buffer.from(buffer).toString("base64");
 
     const response = await client.messages.create({

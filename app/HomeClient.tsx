@@ -50,23 +50,23 @@ const networkLabel: Record<string, string> = {
 };
 
 const TIER_ORDER: Record<MatchTier, number> = {
-  original_era: 0,
-  vintage_pre_owned: 1,
-  vintage_reproduction: 2,
-  modern_inspired: 3,
+  vintage: 0,
+  pre_owned: 1,
+  reproduction: 2,
+  modern: 3,
 };
 
 const TIER_SHORT: Record<MatchTier, string> = {
-  original_era: "Antique",
-  vintage_pre_owned: "Pre-Owned",
-  vintage_reproduction: "Reproduction",
-  modern_inspired: "Modern",
+  vintage: "Vintage",
+  pre_owned: "Pre-Owned",
+  reproduction: "Reproduction",
+  modern: "Modern",
 };
 
 function sortedProducts(products: Product[]): Product[] {
   return [...products].sort((a, b) => {
-    const ta = TIER_ORDER[a.match_tier ?? "modern_inspired"];
-    const tb = TIER_ORDER[b.match_tier ?? "modern_inspired"];
+    const ta = TIER_ORDER[a.match_tier ?? "modern"];
+    const tb = TIER_ORDER[b.match_tier ?? "modern"];
     if (ta !== tb) return ta - tb;
     return a.display_order - b.display_order;
   });
@@ -308,7 +308,7 @@ export default function HomeClient({
                           id={`product-${product.id}`}
                           className="product-card-snap"
                         >
-                          <ProductFrame tier={product.match_tier ?? "modern_inspired"}>
+                          <ProductFrame tier={product.match_tier ?? "modern"}>
                             <div className="aspect-square overflow-hidden image-wrapper">
                               {product.image_url ? (
                                 // eslint-disable-next-line @next/next/no-img-element
@@ -333,7 +333,7 @@ export default function HomeClient({
                               <p className="text-navy/50 text-xs mb-1">Size: {product.size}</p>
                             )}
                             <p className="text-navy/35 text-[10px] uppercase tracking-widest mb-2">
-                              {TIER_SHORT[product.match_tier ?? "modern_inspired"]}
+                              {TIER_SHORT[product.match_tier ?? "modern"]}
                             </p>
                             <a
                               href={product.affiliate_url}
