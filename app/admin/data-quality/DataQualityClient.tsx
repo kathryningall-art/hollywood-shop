@@ -211,7 +211,7 @@ export default function DataQualityClient({
                       const saveError = errors[savingKey];
 
                       return (
-                        <tr key={p.id} className="align-top">
+                        <tr key={p.id} className="align-top group/row">
                           {/* Product info */}
                           <td className="px-4 py-3 max-w-xs">
                             <p className="text-navy text-sm leading-snug line-clamp-2 mb-0.5">
@@ -339,6 +339,15 @@ export default function DataQualityClient({
                                 No auto-fix — tier and retailer may need manual review.
                               </p>
                             )}
+
+                            {/* ── Dismiss (always shown) ──────────────── */}
+                            <button
+                              onClick={() => removeIssue(p.id, code)}
+                              className="mt-2 text-[11px] text-navy/25 hover:text-navy/60 transition-colors tracking-wide"
+                              title="Dismiss — mark as reviewed, no change needed"
+                            >
+                              × Dismiss
+                            </button>
                           </td>
                         </tr>
                       );

@@ -30,7 +30,7 @@ const KNOWN_SITES: Array<{
   { host: "macys.com",         retailer: "Macy's",        tier: "modern" },
 ];
 
-const VALID_PRICE_RE = /^(CA\$|[£€\$])\d+(\.\d{2})?$/;
+const VALID_PRICE_RE = /^(CA\$|[£€\$])\d{1,3}(,\d{3})*(\.\d{2})?$/;
 
 const TIER_LABELS: Record<MatchTier, string> = {
   vintage:      "Vintage",
