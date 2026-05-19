@@ -158,6 +158,14 @@ export default function HomeClient({
     return () => observers.forEach((o) => o.disconnect());
   }, [stars]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Add padding-bottom to <body> when the strip is visible so the footer
+  // is never hidden underneath it — the extra space lets the user scroll
+  // the footer clear above the strip.
+  useEffect(() => {
+    document.body.classList.toggle("strip-active", stripVisible);
+    return () => document.body.classList.remove("strip-active");
+  }, [stripVisible]);
+
   function toggleLook(lookId: string) {
     setExpandedLookId((prev) => (prev === lookId ? null : lookId));
   }

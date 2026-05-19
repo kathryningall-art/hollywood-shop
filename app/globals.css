@@ -160,6 +160,16 @@ h4 {
   .frame-modern { border-color: #E8E4DC; }
 }
 
+/* Push footer above the floating product strip when it's visible */
+body.strip-active {
+  padding-bottom: 156px;
+}
+@media (min-width: 768px) {
+  body.strip-active {
+    padding-bottom: 204px;
+  }
+}
+
 /* Filmstrip carousel scrollbar styling */
 .filmstrip {
   scrollbar-width: thin;
