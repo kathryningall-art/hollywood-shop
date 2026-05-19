@@ -160,13 +160,14 @@ h4 {
   .frame-modern { border-color: #E8E4DC; }
 }
 
-/* Push footer above the floating product strip when it's visible */
-body.strip-active {
-  padding-bottom: 156px;
+/* Push footer above the floating product strip when it's visible.
+   margin-bottom on the footer itself creates the exact gap needed. */
+body.strip-active footer {
+  margin-bottom: 156px;
 }
 @media (min-width: 768px) {
-  body.strip-active {
-    padding-bottom: 204px;
+  body.strip-active footer {
+    margin-bottom: 204px;
   }
 }
 
