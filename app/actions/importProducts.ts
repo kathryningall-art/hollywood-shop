@@ -306,7 +306,6 @@ export async function importProductsFromUrls(urls: string[]): Promise<ImportedPr
     urls.map(async (url): Promise<ImportedProduct> => {
       const { retailer, network, tier } = detectSite(url);
       const isEtsy = new URL(url).hostname.includes("etsy.com");
-      console.log("[import]", url.slice(0, 60), "| isEtsy:", isEtsy, "| apiKey:", !!process.env.ETSY_API_KEY);
       try {
         let title: string | null, image_url: string | null, price_display: string | null, size: string | null;
 
