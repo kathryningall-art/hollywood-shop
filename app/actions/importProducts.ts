@@ -167,7 +167,7 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
   if (!apiKey) throw new Error("ETSY_API_KEY not configured");
 
   const res = await fetch(
-    `https://openapi.etsy.com/v3/application/listings/${listingId}?includes=Images`,
+    `https://openapi.etsy.com/v3/application/listings/active?listing_ids[]=${listingId}&includes[]=Images&limit=1`,
     {
       headers: { "x-api-key": apiKey },
       signal: AbortSignal.timeout(10_000),
@@ -176,19 +176,24 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
   if (!res.ok) throw new Error(`Etsy API error ${res.status}`);
 
   const data = await res.json() as {
-    title?: string;
-    price?: { amount: number; divisor: number; currency_code: string };
-    images?: Array<{ url_570xN?: string; url_fullxfull?: string }>;
+    results?: Array<{
+      title?: string;
+      price?: { amount: number; divisor: number; currency_code: string };
+      images?: Array<{ url_570xN?: string; url_fullxfull?: string }>;
+    }>;
   };
 
-  const title = data.title ?? null;
+  const listing = data.results?.[0];
+  if (!listing) throw new Error("Listing not found or no longer active");
+
+  const title = listing.title ?? null;
 
   const image_url =
-    data.images?.[0]?.url_570xN ?? data.images?.[0]?.url_fullxfull ?? null;
+    listing.images?.[0]?.url_570xN ?? listing.images?.[0]?.url_fullxfull ?? null;
 
   let price_display: string | null = null;
-  if (data.price) {
-    const { amount, divisor, currency_code } = data.price;
+  if (listing.price) {
+    const { amount, divisor, currency_code } = listing.price;
     price_display = formatPrice(amount / divisor, currency_code);
   }
 
