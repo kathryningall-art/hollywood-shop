@@ -152,6 +152,58 @@ function extractData(html: string, url: string) {
   return { title, image_url, price_display, size };
 }
 
+// ─── Title cleanup ────────────────────────────────────────────────
+
+const SHOUTY_PREFIXES = [
+  /^bogo\s+special!?\s*/i,
+  /^free\s+shipping!?\s*/i,
+  /^sale!?\s*/i,
+  /^new!?\s*/i,
+  /^hot!?\s*/i,
+  /^on\s+sale!?\s*/i,
+  /^clearance!?\s*/i,
+  /^limited\s+time!?\s*/i,
+  /^ships?\s+now!?\s*/i,
+  /^\([^)]*ships?\s+now[^)]*\)\s*/i,
+];
+
+function titleCaseWord(word: string): string {
+  // Preserve short connector words in lowercase if not first
+  if (word.length === 0) return word;
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+function cleanTitle(raw: string | null): string | null {
+  if (!raw) return raw;
+  let title = raw.trim();
+  // Strip shouty prefixes (apply repeatedly in case there are several)
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const re of SHOUTY_PREFIXES) {
+      if (re.test(title)) {
+        title = title.replace(re, "");
+        changed = true;
+      }
+    }
+  }
+  // If the whole title is ALL CAPS or mostly caps, convert to Title Case
+  const letters = title.replace(/[^a-zA-Z]/g, "");
+  const upperCount = (title.match(/[A-Z]/g) ?? []).length;
+  if (letters.length > 0 && upperCount / letters.length > 0.6) {
+    title = title
+      .split(/\s+/)
+      .map((w, i) => {
+        // keep small connector words lowercase mid-sentence
+        if (i > 0 && /^(and|or|of|the|a|an|in|on|for|with|to)$/i.test(w))
+          return w.toLowerCase();
+        return titleCaseWord(w);
+      })
+      .join(" ");
+  }
+  return title.trim() || null;
+}
+
 // ─── Etsy API fetcher ─────────────────────────────────────────────
 
 function extractEtsyListingId(url: string): string | null {
@@ -168,7 +220,7 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
   if (!apiKey || !sharedSecret) throw new Error("Etsy API credentials not configured");
 
   const res = await fetch(
-    `https://openapi.etsy.com/v3/application/listings/active?listing_ids[]=${listingId}&includes[]=Images&limit=1`,
+    `https://openapi.etsy.com/v3/application/listings/${listingId}?includes=Images`,
     {
       headers: { "x-api-key": `${apiKey}:${sharedSecret}` },
       signal: AbortSignal.timeout(10_000),
@@ -179,18 +231,13 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
     throw new Error(`Etsy API error ${res.status}: ${body.slice(0, 120)}`);
   }
 
-  const data = await res.json() as {
-    results?: Array<{
-      title?: string;
-      price?: { amount: number; divisor: number; currency_code: string };
-      images?: Array<{ url_570xN?: string; url_fullxfull?: string }>;
-    }>;
+  const listing = await res.json() as {
+    title?: string;
+    price?: { amount: number; divisor: number; currency_code: string };
+    images?: Array<{ url_570xN?: string; url_fullxfull?: string }>;
   };
 
-  const listing = data.results?.[0];
-  if (!listing) throw new Error("Listing not found or no longer active");
-
-  const title = listing.title ?? null;
+  const title = cleanTitle(listing.title ?? null);
 
   const image_url =
     listing.images?.[0]?.url_570xN ?? listing.images?.[0]?.url_fullxfull ?? null;
