@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bodoni_Moda, EB_Garamond, Cormorant_SC } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
+import { Analytics } from "@vercel/analytics/next";
 import Footer from "@/app/components/Footer";
 import "./globals.css";
 
@@ -76,6 +77,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
 
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
