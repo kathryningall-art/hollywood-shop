@@ -204,6 +204,52 @@ function cleanTitle(raw: string | null): string | null {
   return title.trim() || null;
 }
 
+// ─── Size extraction ──────────────────────────────────────────────
+
+const LETTER_SIZES = "XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|2XL|3XL|4XL|5XL";
+const WORD_SIZES = "extra\\s+small|extra\\s+large|small|medium|large";
+
+function extractSizeFromTitle(title: string): string | null {
+  if (!title) return null;
+
+  // Pattern 1: "Size X" / "Size: X" / "Sz X" — most reliable
+  const labeled = title.match(
+    new RegExp(`\\b(?:size|sz)[:\\s]+(${LETTER_SIZES}|${WORD_SIZES}|\\d+(?:\\.\\d+)?(?:W|T|P)?)\\b`, "i")
+  );
+  if (labeled) return normalizeSize(labeled[1]);
+
+  // Pattern 2: parenthetical — "(Size M)" or "(M)"
+  const paren = title.match(
+    new RegExp(`\\((?:size[:\\s]+)?(${LETTER_SIZES}|${WORD_SIZES}|\\d+(?:\\.\\d+)?(?:W|T|P)?)\\)`, "i")
+  );
+  if (paren) return normalizeSize(paren[1]);
+
+  // Pattern 3: trailing — "..., Small" or "... - M" at end of title
+  const trailing = title.match(
+    new RegExp(`[,\\-]\\s*(${LETTER_SIZES}|${WORD_SIZES})\\s*$`, "i")
+  );
+  if (trailing) return normalizeSize(trailing[1]);
+
+  return null;
+}
+
+function normalizeSize(raw: string): string {
+  const trimmed = raw.trim();
+  // Letter sizes — uppercase
+  if (/^(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|2XL|3XL|4XL|5XL)$/i.test(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+  // Word sizes — Title Case ("Small", "Extra Large")
+  if (/^(extra\s+small|extra\s+large|small|medium|large)$/i.test(trimmed)) {
+    return trimmed
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  // Numeric sizes — keep digits, uppercase suffix
+  return trimmed.replace(/(\d)([a-zA-Z])/g, (_, d, l) => d + l.toUpperCase());
+}
+
 // ─── Etsy API fetcher ─────────────────────────────────────────────
 
 function extractEtsyListingId(url: string): string | null {
@@ -237,7 +283,9 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
     images?: Array<{ url_570xN?: string; url_fullxfull?: string }>;
   };
 
-  const title = cleanTitle(listing.title ?? null);
+  const rawTitle = listing.title ?? null;
+  const size = rawTitle ? extractSizeFromTitle(rawTitle) : null;
+  const title = cleanTitle(rawTitle);
 
   const image_url =
     listing.images?.[0]?.url_570xN ?? listing.images?.[0]?.url_fullxfull ?? null;
@@ -248,7 +296,7 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
     price_display = formatPrice(amount / divisor, currency_code);
   }
 
-  return { title, image_url, price_display, size: null };
+  return { title, image_url, price_display, size };
 }
 
 // ─── Exported server action ───────────────────────────────────────
