@@ -164,16 +164,20 @@ async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; im
   if (!listingId) throw new Error("Could not parse Etsy listing ID from URL");
 
   const apiKey = process.env.ETSY_API_KEY;
-  if (!apiKey) throw new Error("ETSY_API_KEY not configured");
+  const sharedSecret = process.env.ETSY_SHARED_SECRET;
+  if (!apiKey || !sharedSecret) throw new Error("Etsy API credentials not configured");
 
   const res = await fetch(
     `https://openapi.etsy.com/v3/application/listings/active?listing_ids[]=${listingId}&includes[]=Images&limit=1`,
     {
-      headers: { "x-api-key": apiKey },
+      headers: { "x-api-key": `${apiKey}:${sharedSecret}` },
       signal: AbortSignal.timeout(10_000),
     }
   );
-  if (!res.ok) throw new Error(`Etsy API error ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Etsy API error ${res.status}: ${body.slice(0, 120)}`);
+  }
 
   const data = await res.json() as {
     results?: Array<{
