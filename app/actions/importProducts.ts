@@ -152,24 +152,76 @@ function extractData(html: string, url: string) {
   return { title, image_url, price_display, size };
 }
 
+// ─── Etsy API fetcher ─────────────────────────────────────────────
+
+function extractEtsyListingId(url: string): string | null {
+  const m = url.match(/\/listing\/(\d+)/);
+  return m ? m[1] : null;
+}
+
+async function fetchFromEtsyApi(url: string): Promise<{ title: string | null; image_url: string | null; price_display: string | null; size: string | null }> {
+  const listingId = extractEtsyListingId(url);
+  if (!listingId) throw new Error("Could not parse Etsy listing ID from URL");
+
+  const apiKey = process.env.ETSY_API_KEY;
+  if (!apiKey) throw new Error("ETSY_API_KEY not configured");
+
+  const res = await fetch(
+    `https://openapi.etsy.com/v3/application/listings/${listingId}?includes=Images`,
+    {
+      headers: { "x-api-key": apiKey },
+      signal: AbortSignal.timeout(10_000),
+    }
+  );
+  if (!res.ok) throw new Error(`Etsy API error ${res.status}`);
+
+  const data = await res.json() as {
+    title?: string;
+    price?: { amount: number; divisor: number; currency_code: string };
+    images?: Array<{ url_570xN?: string; url_fullxfull?: string }>;
+  };
+
+  const title = data.title ?? null;
+
+  const image_url =
+    data.images?.[0]?.url_570xN ?? data.images?.[0]?.url_fullxfull ?? null;
+
+  let price_display: string | null = null;
+  if (data.price) {
+    const { amount, divisor, currency_code } = data.price;
+    price_display = formatPrice(amount / divisor, currency_code);
+  }
+
+  return { title, image_url, price_display, size: null };
+}
+
 // ─── Exported server action ───────────────────────────────────────
 
 export async function importProductsFromUrls(urls: string[]): Promise<ImportedProduct[]> {
   const settled = await Promise.allSettled(
     urls.map(async (url): Promise<ImportedProduct> => {
       const { retailer, network, tier } = detectSite(url);
+      const isEtsy = new URL(url).hostname.includes("etsy.com");
+      console.log("[import]", url.slice(0, 60), "| isEtsy:", isEtsy, "| apiKey:", !!process.env.ETSY_API_KEY);
       try {
-        const res = await fetch(url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9",
-          },
-          signal: AbortSignal.timeout(15_000),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status} — try adding manually`);
-        const html = await res.text();
-        const { title, image_url, price_display, size } = extractData(html, url);
+        let title: string | null, image_url: string | null, price_display: string | null, size: string | null;
+
+        if (isEtsy) {
+          ({ title, image_url, price_display, size } = await fetchFromEtsyApi(url));
+        } else {
+          const res = await fetch(url, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+              Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+            },
+            signal: AbortSignal.timeout(15_000),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status} — try adding manually`);
+          const html = await res.text();
+          ({ title, image_url, price_display, size } = extractData(html, url));
+        }
+
         return { url, title, retailer, network, match_tier: tier, image_url, price_display, size, error: null };
       } catch (err) {
         return {
