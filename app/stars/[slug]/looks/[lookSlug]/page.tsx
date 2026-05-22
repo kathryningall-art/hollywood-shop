@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
-import { buildOpenGraph, buildTwitter, truncate } from "@/lib/og";
+import { buildOpenGraph, buildTwitter, truncate, buildPinDescription } from "@/lib/og";
+import PinSaveButton from "@/app/components/PinSaveButton";
 
 interface Props {
   params: Promise<{ slug: string; lookSlug: string }>;
@@ -113,14 +114,26 @@ export default async function LookPage({ params }: Props) {
           <div>
             <div className="aspect-[3/4] relative overflow-hidden bg-navy/5">
               {look.image_url && (
-                <Image
-                  src={look.image_url}
-                  alt={look.title}
-                  fill
-                  className="object-cover object-top"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                />
+                <>
+                  <Image
+                    src={look.image_url}
+                    alt={look.title}
+                    fill
+                    className="object-cover object-top"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
+                  <PinSaveButton
+                    pageUrl={`/stars/${star.slug}/looks/${lookSlug}`}
+                    mediaUrl={look.image_url}
+                    description={buildPinDescription({
+                      lookTitle: look.title,
+                      starName: star.name,
+                      editorialText: look.editorial_text,
+                      year: look.year,
+                    })}
+                  />
+                </>
               )}
             </div>
             <p className="text-warm-gray/60 text-xs mt-3 leading-relaxed">

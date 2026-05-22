@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { MatchTier } from "@/app/components/ProductFrame";
-import { buildOpenGraph, buildTwitter, truncate } from "@/lib/og";
+import { buildOpenGraph, buildTwitter, truncate, buildPinDescription } from "@/lib/og";
+import PinSaveButton from "@/app/components/PinSaveButton";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -185,11 +186,24 @@ export default async function LookPage({
       {/* Look image */}
       {look.image_url && (
         <div className="mb-6">
-          <img
-            src={look.image_url}
-            alt={`${star.name} — ${look.title}`}
-            className="w-full h-auto"
-          />
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={look.image_url}
+              alt={`${star.name} — ${look.title}`}
+              className="w-full h-auto"
+            />
+            <PinSaveButton
+              pageUrl={`/star/${starSlug}/${lookSlug}`}
+              mediaUrl={look.image_url}
+              description={buildPinDescription({
+                lookTitle: look.title,
+                starName: star.name,
+                editorialText: look.editorial_text,
+                year: look.year,
+              })}
+            />
+          </div>
           {(look.image_credit || look.image_source_url) && (
             <p className="text-navy/30 text-[10px] mt-1.5 tracking-wide">
               {look.image_source_url ? (

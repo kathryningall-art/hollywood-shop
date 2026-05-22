@@ -89,6 +89,69 @@ export function buildTwitter({
 }
 
 /**
+ * Build a Pinterest pin description with brand header, editorial paragraph,
+ * CTA, and hashtags. Stays within Pinterest's 500-character limit by
+ * further truncating the editorial paragraph if needed.
+ */
+export function buildPinDescription({
+  lookTitle,
+  starName,
+  editorialText,
+  year,
+}: {
+  lookTitle: string;
+  starName: string;
+  editorialText?: string | null;
+  year?: number | null;
+}): string {
+  const MAX = 500;
+
+  const header = `${lookTitle} — ${starName} · Bias Cut Bureau`;
+  const cta = "Shop the look at biascutbureau.com";
+
+  // Star hashtag: name concatenated, alphanumeric only (handles hyphens, apostrophes)
+  const starTag = `#${starName.replace(/[^a-zA-Z0-9]/g, "")}`;
+
+  // Decade hashtag: from year, e.g. 1932 → #1930sFashion
+  const decadeTag =
+    typeof year === "number" && year > 0
+      ? `#${Math.floor(year / 10) * 10}sFashion`
+      : null;
+
+  const hashtags = [
+    "#ClassicHollywood",
+    "#VintageStyle",
+    "#OldHollywood",
+    starTag,
+    "#VintageFashion",
+    decadeTag,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  function assemble(editorialBlock: string | null): string {
+    return [header, editorialBlock, cta, hashtags]
+      .filter((part): part is string => Boolean(part))
+      .join("\n\n");
+  }
+
+  // Start with editorial truncated to 400 chars (per brief)
+  let editorialBlock = editorialText ? truncate(editorialText, 400) : null;
+  let description = assemble(editorialBlock || null);
+
+  // If still too long, shrink editorial further until total fits within 500
+  if (description.length > MAX && editorialBlock) {
+    // How many chars over budget the description is
+    const overflow = description.length - MAX;
+    const newEditorialMax = Math.max(0, editorialBlock.length - overflow);
+    editorialBlock = newEditorialMax > 0 ? truncate(editorialText, newEditorialMax) : null;
+    description = assemble(editorialBlock);
+  }
+
+  return description;
+}
+
+/**
  * Pinterest-specific tags that can't go in `openGraph` or `twitter` blocks.
  * Use as the `other` field of a Next.js Metadata object.
  *
