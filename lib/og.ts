@@ -152,6 +152,47 @@ export function buildPinDescription({
 }
 
 /**
+ * Pin destination URL — used by the admin pin generator + Pinterest Save buttons.
+ * Mirrors the canonical /stars/[slug]/looks/[lookSlug] route.
+ */
+export function buildLookPublicUrl(starSlug: string, lookSlug: string): string {
+  return absoluteUrl(`/stars/${starSlug}/looks/${lookSlug}`);
+}
+
+/**
+ * Suggest which Pinterest boards a given look fits, based on its year and star.
+ * Returns boards in priority order: decade-specific → star-specific → general inspiration → fallback.
+ */
+export function getSuggestedBoards({
+  starName,
+  year,
+}: {
+  starName: string;
+  year?: number | null;
+}): string[] {
+  const boards: string[] = [];
+
+  // Decade-specific board (if year known)
+  if (typeof year === "number" && year > 0) {
+    if (year < 1930) boards.push("1920s Fashion");
+    else if (year < 1940) boards.push("1930s Glamour");
+    else if (year < 1950) boards.push("1940s Style");
+    else if (year < 1960) boards.push("1950s Fashion");
+  }
+
+  // Star-specific board (always)
+  boards.push(`${starName} Style`);
+
+  // General inspiration board (always)
+  boards.push("Vintage Wardrobe Inspiration");
+
+  // General fallback (always)
+  boards.push("Classic Hollywood Style");
+
+  return boards;
+}
+
+/**
  * Pinterest-specific tags that can't go in `openGraph` or `twitter` blocks.
  * Use as the `other` field of a Next.js Metadata object.
  *

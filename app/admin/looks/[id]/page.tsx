@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { generateEditorial, type EditorialVariant } from "@/app/actions/generateEditorial";
 import ImageUpload from "@/app/admin/ImageUpload";
+import GeneratePinCard from "./GeneratePinCard";
 
 const LICENSE_OPTIONS = [
   { value: "public_domain_us", label: "Public Domain (US)" },
@@ -21,7 +22,7 @@ const LICENSE_OPTIONS = [
 export default function EditLookPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [id, setId] = useState("");
-  const [stars, setStars] = useState<{ id: string; name: string; publicity_rights_risk: string }[]>([]);
+  const [stars, setStars] = useState<{ id: string; name: string; slug: string; publicity_rights_risk: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -51,7 +52,7 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
     const supabase = createClient();
     supabase
       .from("stars")
-      .select("id, name, publicity_rights_risk")
+      .select("id, name, slug, publicity_rights_risk")
       .order("name")
       .then(({ data }) => setStars(data ?? []));
 
@@ -422,6 +423,19 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
             </div>
           )}
         </div>
+
+        {id && (
+          <GeneratePinCard
+            lookId={id}
+            lookTitle={form.title}
+            lookSlug={form.slug}
+            editorialText={form.editorial_text}
+            year={parseInt(form.year) || null}
+            hasImage={Boolean(form.image_url)}
+            starName={selectedStar?.name ?? ""}
+            starSlug={selectedStar?.slug ?? ""}
+          />
+        )}
 
         <div className="border-t border-navy/10 pt-6">
           <label className="flex items-start gap-3 cursor-pointer">
