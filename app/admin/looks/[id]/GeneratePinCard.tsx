@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from "react";
 import {
-  buildPinDescription,
+  buildPinTitle,
+  buildPinDescriptionBody,
+  buildPinHashtags,
   buildPinAltText,
   getSuggestedBoards,
   buildLookPublicUrl,
@@ -33,20 +35,34 @@ export default function GeneratePinCard({
   const [previewing, setPreviewing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
+  const [copiedTitle, setCopiedTitle] = useState(false);
   const [copiedDesc, setCopiedDesc] = useState(false);
+  const [copiedTags, setCopiedTags] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedAlt, setCopiedAlt] = useState(false);
 
   // Compose pin description from current form state — updates live as user edits
-  const description = useMemo(
+  const pinTitle = useMemo(
     () =>
-      buildPinDescription({
+      buildPinTitle({
         lookTitle: lookTitle || "Untitled Look",
         starName: starName || "Unknown Star",
-        editorialText,
+      }),
+    [lookTitle, starName]
+  );
+
+  const pinBody = useMemo(
+    () => buildPinDescriptionBody({ editorialText }),
+    [editorialText]
+  );
+
+  const pinTags = useMemo(
+    () =>
+      buildPinHashtags({
+        starName: starName || "Star",
         year,
       }),
-    [lookTitle, starName, editorialText, year]
+    [starName, year]
   );
 
   const altText = useMemo(
@@ -122,35 +138,19 @@ export default function GeneratePinCard({
     }
   }
 
-  async function handleCopyDescription() {
+  async function copyToClipboard(
+    text: string,
+    setCopied: (v: boolean) => void
+  ) {
     try {
-      await navigator.clipboard.writeText(description);
-      setCopiedDesc(true);
-      setTimeout(() => setCopiedDesc(false), 2000);
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       setError("Could not copy to clipboard.");
     }
   }
 
-  async function handleCopyUrl() {
-    try {
-      await navigator.clipboard.writeText(pinUrl);
-      setCopiedUrl(true);
-      setTimeout(() => setCopiedUrl(false), 2000);
-    } catch {
-      setError("Could not copy to clipboard.");
-    }
-  }
-
-  async function handleCopyAlt() {
-    try {
-      await navigator.clipboard.writeText(altText);
-      setCopiedAlt(true);
-      setTimeout(() => setCopiedAlt(false), 2000);
-    } catch {
-      setError("Could not copy to clipboard.");
-    }
-  }
 
   return (
     <div className="border-t border-navy/10 pt-6">
@@ -214,7 +214,7 @@ export default function GeneratePinCard({
             />
             <button
               type="button"
-              onClick={handleCopyUrl}
+              onClick={() => copyToClipboard(pinUrl, setCopiedUrl)}
               className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-2 transition-colors whitespace-nowrap"
             >
               {copiedUrl ? "Copied ✓" : "Copy URL"}
@@ -222,18 +222,43 @@ export default function GeneratePinCard({
           </div>
         </div>
 
-        {/* Pin description */}
+        {/* Pin title */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-navy text-xs tracking-widest uppercase">
+              Pin Title{" "}
+              <span className="text-navy/40 normal-case tracking-normal">
+                ({pinTitle.length}/100 chars)
+              </span>
+            </label>
+            <button
+              type="button"
+              onClick={() => copyToClipboard(pinTitle, setCopiedTitle)}
+              className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-1.5 transition-colors"
+            >
+              {copiedTitle ? "Copied ✓" : "Copy Title"}
+            </button>
+          </div>
+          <input
+            readOnly
+            value={pinTitle}
+            className="w-full border border-navy/20 px-3 py-2.5 text-navy text-sm bg-white font-mono"
+            onFocus={(e) => e.currentTarget.select()}
+          />
+        </div>
+
+        {/* Pin description body (no hashtags) */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-navy text-xs tracking-widest uppercase">
               Pin Description{" "}
               <span className="text-navy/40 normal-case tracking-normal">
-                ({description.length}/500 chars)
+                ({pinBody.length} chars)
               </span>
             </label>
             <button
               type="button"
-              onClick={handleCopyDescription}
+              onClick={() => copyToClipboard(pinBody, setCopiedDesc)}
               className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-1.5 transition-colors"
             >
               {copiedDesc ? "Copied ✓" : "Copy Description"}
@@ -241,9 +266,34 @@ export default function GeneratePinCard({
           </div>
           <textarea
             readOnly
-            value={description}
-            rows={10}
+            value={pinBody}
+            rows={7}
             className="w-full border border-navy/20 px-3 py-2.5 text-navy text-sm bg-white font-mono leading-relaxed"
+          />
+        </div>
+
+        {/* Pin tags */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-navy text-xs tracking-widest uppercase">
+              Pin Tags{" "}
+              <span className="text-navy/40 normal-case tracking-normal">
+                ({pinTags.length} chars)
+              </span>
+            </label>
+            <button
+              type="button"
+              onClick={() => copyToClipboard(pinTags, setCopiedTags)}
+              className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-1.5 transition-colors"
+            >
+              {copiedTags ? "Copied ✓" : "Copy Tags"}
+            </button>
+          </div>
+          <input
+            readOnly
+            value={pinTags}
+            className="w-full border border-navy/20 px-3 py-2.5 text-navy text-sm bg-white font-mono"
+            onFocus={(e) => e.currentTarget.select()}
           />
           <p className="text-navy/40 text-xs mt-1.5">
             Suggested boards: {suggestedBoards.join(" · ")}
@@ -261,7 +311,7 @@ export default function GeneratePinCard({
             </label>
             <button
               type="button"
-              onClick={handleCopyAlt}
+              onClick={() => copyToClipboard(altText, setCopiedAlt)}
               className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-1.5 transition-colors"
             >
               {copiedAlt ? "Copied ✓" : "Copy Alt Text"}

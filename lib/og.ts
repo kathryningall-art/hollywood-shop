@@ -89,9 +89,71 @@ export function buildTwitter({
 }
 
 /**
+ * Pin title — short headline for Pinterest's title field (max ~100 chars).
+ * Format: "[Look Title] — [Star Name]"
+ */
+export function buildPinTitle({
+  lookTitle,
+  starName,
+}: {
+  lookTitle: string;
+  starName: string;
+}): string {
+  const MAX = 100;
+  const title = `${lookTitle} — ${starName}`;
+  return title.length <= MAX ? title : truncate(title, MAX);
+}
+
+/**
+ * Pin description body — editorial paragraph + CTA line. No hashtags.
+ * For Pinterest's description field (separate from tags).
+ */
+export function buildPinDescriptionBody({
+  editorialText,
+}: {
+  editorialText?: string | null;
+}): string {
+  const editorial = editorialText ? truncate(editorialText, 400) : null;
+  const cta = "Shop the look at biascutbureau.com";
+  return editorial ? `${editorial}\n\n${cta}` : cta;
+}
+
+/**
+ * Pin hashtags — space-separated tag list, ready to paste into Pinterest's
+ * tags field or appended to a description.
+ */
+export function buildPinHashtags({
+  starName,
+  year,
+}: {
+  starName: string;
+  year?: number | null;
+}): string {
+  const starTag = `#${starName.replace(/[^a-zA-Z0-9]/g, "")}`;
+  const decadeTag =
+    typeof year === "number" && year > 0
+      ? `#${Math.floor(year / 10) * 10}sFashion`
+      : null;
+  return [
+    "#ClassicHollywood",
+    "#VintageStyle",
+    "#OldHollywood",
+    starTag,
+    "#VintageFashion",
+    decadeTag,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/**
  * Build a Pinterest pin description with brand header, editorial paragraph,
  * CTA, and hashtags. Stays within Pinterest's 500-character limit by
  * further truncating the editorial paragraph if needed.
+ *
+ * Used by the public Save button (single description field on Pinterest).
+ * The admin pin generator splits this into Title + Description + Tags via
+ * the helpers above.
  */
 export function buildPinDescription({
   lookTitle,
