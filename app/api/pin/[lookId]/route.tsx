@@ -338,8 +338,9 @@ function PinLayout({
           <img
             src={m4Mark}
             alt=""
+            width={66}
             height={66}
-            style={{ height: 66, width: "auto" }}
+            style={{ width: 66, height: 66 }}
           />
         )}
       </div>
@@ -402,8 +403,16 @@ export async function GET(
     console.log("[pin] data ok, loading assets...");
 
     // 3) Compose text zone content
-    // No film_title column on the schema → film/year line is always omitted for now.
-    const filmAndYear: string | null = null;
+    // The pin's "film · year" line shows year when no film_title exists.
+    // (No film_title column on schema yet — add one to surface a film title.)
+    const filmTitle: string | null = null;
+    const yearStr =
+      look.year_display ?? (look.year ? String(look.year) : null);
+    const filmAndYear = filmTitle
+      ? yearStr
+        ? `${filmTitle} · ${yearStr}`
+        : filmTitle
+      : yearStr;
 
     // 4) Assets (M4 mark + fonts)
     const m4Mark = loadM4Mark();
