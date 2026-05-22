@@ -391,9 +391,10 @@ export async function GET(
       fonts.length > 0 ? "Bodoni Moda" : "Georgia, 'Times New Roman', serif";
     console.log("[pin] assets ready. fonts:", fonts.length, "m4Mark:", !!m4Mark);
 
-    // 5) Render
+    // 5) Render — force the buffer so any Satori error is caught here,
+    //    not after the response stream starts.
     console.log("[pin] rendering ImageResponse...");
-    return new ImageResponse(
+    const response = new ImageResponse(
       (
         <PinLayout
           imageUrl={look.image_url}
@@ -409,6 +410,18 @@ export async function GET(
         fonts: fonts.length > 0 ? fonts : undefined,
       }
     );
+
+    console.log("[pin] forcing buffer to catch Satori errors...");
+    const buffer = await response.arrayBuffer();
+    console.log("[pin] success — buffer size:", buffer.byteLength);
+
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (err) {
     console.error("[pin] handler crashed:", err);
     const message = err instanceof Error ? err.message : String(err);
