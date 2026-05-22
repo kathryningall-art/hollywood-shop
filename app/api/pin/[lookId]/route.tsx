@@ -277,6 +277,7 @@ function PinLayout({
       </div>
 
       {/* ── Text zone (y=1200 to y=1500) ──────────────────────────────── */}
+      {/* Bottom-aligned: diamond sits 32px from pin bottom, stack grows upward. */}
       <div
         style={{
           position: "absolute",
@@ -287,7 +288,8 @@ function PinLayout({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-end",
+          paddingBottom: 32,
         }}
       >
         {filmAndYear && (
