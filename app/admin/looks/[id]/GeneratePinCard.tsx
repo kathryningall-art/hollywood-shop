@@ -66,8 +66,9 @@ export default function GeneratePinCard({
       // Cache-bust each click so the preview reflects the latest saved DB state
       const res = await fetch(`/api/pin/${lookId}?v=${Date.now()}`);
       if (!res.ok) {
-        const body = await res.json().catch(() => ({ error: "Preview failed" }));
-        throw new Error(body.error ?? `Preview failed (HTTP ${res.status})`);
+        const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        const msg = body.detail ? `${body.error}: ${body.detail}` : (body.error ?? `HTTP ${res.status}`);
+        throw new Error(msg);
       }
       const blob = await res.blob();
       // Revoke previous object URL if any

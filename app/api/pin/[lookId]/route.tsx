@@ -327,73 +327,88 @@ export async function GET(
 ) {
   const { lookId } = await params;
 
-  // 1) Admin-auth gate
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    console.log("[pin] generating for lookId:", lookId);
 
-  // 2) Fetch look + star
-  // NOTE: The brief specifies an optional "[Film Title] · [Year]" line above the
-  //       star name on the pin. The looks table doesn't currently have a
-  //       film_title column, so we always omit that line for now. If you want
-  //       film titles on pins later, add a `film_title text` column to the
-  //       looks table and a matching field on the admin form, then surface it here.
-  const { data: look, error: lookErr } = await supabase
-    .from("looks")
-    .select(
-      "id, title, year, year_display, editorial_text, image_url, slug, stars(id, name, slug)"
-    )
-    .eq("id", lookId)
-    .single();
-
-  if (lookErr || !look) {
-    return Response.json({ error: "Look not found", lookId }, { status: 404 });
-  }
-
-  if (!look.image_url) {
-    return Response.json(
-      { error: "Look has no hero image — cannot generate pin.", lookId },
-      { status: 400 }
-    );
-  }
-
-  const star = look.stars as unknown as { id: string; name: string; slug: string } | null;
-  if (!star) {
-    return Response.json(
-      { error: "Look has no associated star — cannot generate pin.", lookId },
-      { status: 400 }
-    );
-  }
-
-  // 3) Compose text zone content
-  // No film_title column on the schema → film/year line is always omitted for now.
-  const filmAndYear: string | null = null;
-
-  // 4) Assets (M4 mark + fonts)
-  const m4Mark = loadM4Mark();
-  const fonts = await loadBodoniFonts();
-  const fontFamily =
-    fonts.length > 0 ? "Bodoni Moda" : "Georgia, 'Times New Roman', serif";
-
-  // 5) Render
-  return new ImageResponse(
-    (
-      <PinLayout
-        imageUrl={look.image_url}
-        starName={star.name}
-        filmAndYear={filmAndYear}
-        fontFamily={fontFamily}
-        m4Mark={m4Mark}
-      />
-    ),
-    {
-      width: FRAME.W,
-      height: FRAME.H,
-      fonts: fonts.length > 0 ? fonts : undefined,
+    // 1) Admin-auth gate
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-  );
+
+    // 2) Fetch look + star
+    const { data: look, error: lookErr } = await supabase
+      .from("looks")
+      .select(
+        "id, title, year, year_display, editorial_text, image_url, slug, stars(id, name, slug)"
+      )
+      .eq("id", lookId)
+      .single();
+
+    if (lookErr || !look) {
+      console.error("[pin] look query failed:", lookErr);
+      return Response.json(
+        { error: "Look not found", lookId, supabaseError: lookErr?.message },
+        { status: 404 }
+      );
+    }
+
+    if (!look.image_url) {
+      return Response.json(
+        { error: "Look has no hero image — cannot generate pin.", lookId },
+        { status: 400 }
+      );
+    }
+
+    const star = look.stars as unknown as { id: string; name: string; slug: string } | null;
+    if (!star) {
+      return Response.json(
+        { error: "Look has no associated star — cannot generate pin.", lookId },
+        { status: 400 }
+      );
+    }
+
+    console.log("[pin] data ok, loading assets...");
+
+    // 3) Compose text zone content
+    // No film_title column on the schema → film/year line is always omitted for now.
+    const filmAndYear: string | null = null;
+
+    // 4) Assets (M4 mark + fonts)
+    const m4Mark = loadM4Mark();
+    const fonts = await loadBodoniFonts();
+    const fontFamily =
+      fonts.length > 0 ? "Bodoni Moda" : "Georgia, 'Times New Roman', serif";
+    console.log("[pin] assets ready. fonts:", fonts.length, "m4Mark:", !!m4Mark);
+
+    // 5) Render
+    console.log("[pin] rendering ImageResponse...");
+    return new ImageResponse(
+      (
+        <PinLayout
+          imageUrl={look.image_url}
+          starName={star.name}
+          filmAndYear={filmAndYear}
+          fontFamily={fontFamily}
+          m4Mark={m4Mark}
+        />
+      ),
+      {
+        width: FRAME.W,
+        height: FRAME.H,
+        fonts: fonts.length > 0 ? fonts : undefined,
+      }
+    );
+  } catch (err) {
+    console.error("[pin] handler crashed:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    return Response.json(
+      { error: "Pin generation failed", detail: message, stack },
+      { status: 500 }
+    );
+  }
 }
