@@ -119,7 +119,7 @@ export default function EditStarPage({ params }: { params: Promise<{ id: string 
             value={form.slug}
             onChange={(e) => set("slug", e.target.value)}
             required
-            pattern="[a-z0-9-]+"
+            pattern="[-a-z0-9]+"
             className={`${input} font-mono`}
           />
         </Field>

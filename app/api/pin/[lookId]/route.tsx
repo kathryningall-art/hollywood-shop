@@ -77,8 +77,6 @@ async function fetchGoogleFont(
     );
   }
 
-  console.log(`[pin] font ${family} ${weight}${italic ? "i" : ""}: ${match[1].slice(-60)}`);
-
   const fontRes = await fetch(match[1]);
   if (!fontRes.ok) throw new Error(`Font binary HTTP ${fontRes.status}`);
   return fontRes.arrayBuffer();
@@ -359,8 +357,6 @@ export async function GET(
   const { lookId } = await params;
 
   try {
-    console.log("[pin] generating for lookId:", lookId);
-
     // 1) Admin-auth gate
     const supabase = await createClient();
     const {
@@ -402,8 +398,6 @@ export async function GET(
       );
     }
 
-    console.log("[pin] data ok, loading assets...");
-
     // 3) Compose text zone content
     // The pin's "film · year" line shows year when no film_title exists.
     // (No film_title column on schema yet — add one to surface a film title.)
@@ -421,11 +415,8 @@ export async function GET(
     const fonts = await loadBodoniFonts();
     const fontFamily =
       fonts.length > 0 ? "Bodoni Moda" : "Georgia, 'Times New Roman', serif";
-    console.log("[pin] assets ready. fonts:", fonts.length, "m4Mark:", !!m4Mark);
-
     // 5) Render — force the buffer so any Satori error is caught here,
     //    not after the response stream starts.
-    console.log("[pin] rendering ImageResponse...");
     const response = new ImageResponse(
       (
         <PinLayout
@@ -443,9 +434,7 @@ export async function GET(
       }
     );
 
-    console.log("[pin] forcing buffer to catch Satori errors...");
     const buffer = await response.arrayBuffer();
-    console.log("[pin] success — buffer size:", buffer.byteLength);
 
     return new Response(buffer, {
       status: 200,
