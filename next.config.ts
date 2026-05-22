@@ -26,6 +26,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // 301 redirect old singular look URLs to the canonical plural route.
+  // Keeps Pinterest pins, bookmarks, and any external links working.
+  async redirects() {
+    return [
+      {
+        source: "/star/:starSlug/:lookSlug",
+        destination: "/stars/:starSlug/looks/:lookSlug",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

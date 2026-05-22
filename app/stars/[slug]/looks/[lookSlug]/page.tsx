@@ -5,10 +5,63 @@ import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { buildOpenGraph, buildTwitter, truncate, buildPinDescription } from "@/lib/og";
 import PinSaveButton from "@/app/components/PinSaveButton";
+import type { MatchTier } from "@/app/components/ProductFrame";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type Product = {
+  id: string;
+  title: string;
+  retailer: string;
+  image_url: string | null;
+  price_display: string | null;
+  size: string | null;
+  affiliate_url: string;
+  network: string;
+  match_tier: MatchTier;
+  display_order: number;
+};
+
+type SiblingLook = {
+  id: string;
+  title: string;
+  year: number | null;
+  year_display: string | null;
+  image_url: string | null;
+  slug: string;
+};
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const NETWORK_LABEL: Record<string, string> = {
+  etsy: "Etsy",
+  amazon: "Amazon",
+  nordstrom: "Nordstrom",
+  shareasale: "ShareASale",
+  impact: "Impact",
+  rakuten: "Rakuten",
+  direct: "Shop",
+};
+
+const TIER_LABEL: Record<MatchTier, string> = {
+  vintage:      "Vintage",
+  pre_owned:    "Pre-Owned",
+  reproduction: "Reproduction",
+  modern:       "Modern",
+};
+
+const TIER_ACCENT: Record<MatchTier, string> = {
+  vintage:      "border-[#B89752] text-[#B89752]",
+  pre_owned:    "border-[#8B6F47] text-[#8B6F47]",
+  reproduction: "border-[#735834] text-[#735834]",
+  modern:       "border-navy/40 text-navy/50",
+};
 
 interface Props {
   params: Promise<{ slug: string; lookSlug: string }>;
 }
+
+// ─── Metadata ─────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, lookSlug } = await params;
@@ -47,15 +100,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const networkLabel: Record<string, string> = {
-  etsy: "Etsy",
-  amazon: "Amazon",
-  nordstrom: "Nordstrom",
-  shareasale: "ShareASale",
-  impact: "Impact",
-  rakuten: "Rakuten",
-  direct: "Shop",
-};
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function LookPage({ params }: Props) {
   const { slug, lookSlug } = await params;
@@ -72,9 +117,9 @@ export default async function LookPage({ params }: Props) {
   const { data: look } = await supabase
     .from("looks")
     .select(`
-      id, title, year, image_url, image_credit, image_source_url,
+      id, title, year, year_display, image_url, image_credit, image_source_url,
       editorial_text, published,
-      products (id, title, retailer, image_url, price_display, affiliate_url, network, display_order)
+      products (id, title, retailer, image_url, price_display, size, affiliate_url, network, match_tier, display_order)
     `)
     .eq("star_id", star.id)
     .eq("slug", lookSlug)
@@ -83,9 +128,20 @@ export default async function LookPage({ params }: Props) {
 
   if (!look) notFound();
 
-  const sortedProducts = [...(look.products ?? [])].sort(
-    (a, b) => a.display_order - b.display_order
-  );
+  const products = ((look.products ?? []) as unknown as Product[])
+    .slice()
+    .sort((a, b) => a.display_order - b.display_order);
+
+  // Fetch sibling looks by the same star (excluding this one)
+  const { data: siblings } = await supabase
+    .from("looks")
+    .select("id, title, year, year_display, image_url, slug")
+    .eq("star_id", star.id)
+    .eq("published", true)
+    .neq("id", look.id)
+    .order("display_order");
+
+  const siblingLooks = (siblings ?? []) as SiblingLook[];
 
   return (
     <>
@@ -110,8 +166,8 @@ export default async function LookPage({ params }: Props) {
       {/* Look hero */}
       <article className="max-w-6xl mx-auto px-6 pt-10 pb-16 md:pb-24">
         <div className="grid md:grid-cols-[1fr_1fr] lg:grid-cols-[5fr_6fr] gap-12 lg:gap-20 items-start">
-          {/* Left: image */}
-          <div>
+          {/* Left: image (sticky on desktop so it stays visible as products scroll) */}
+          <div className="md:sticky md:top-8">
             <div className="aspect-[3/4] relative overflow-hidden bg-navy/5">
               {look.image_url && (
                 <>
@@ -154,7 +210,7 @@ export default async function LookPage({ params }: Props) {
           {/* Right: editorial + products */}
           <div>
             <p className="font-sc text-brass tracking-widest uppercase text-xs mb-4">
-              {look.year}
+              {look.year_display ?? look.year}
             </p>
             <h1 className="font-serif text-4xl md:text-5xl text-navy mb-8 leading-tight">
               {look.title}
@@ -167,63 +223,118 @@ export default async function LookPage({ params }: Props) {
             </div>
 
             {/* Shop the look */}
-            {sortedProducts.length > 0 && (
+            {products.length > 0 && (
               <div>
                 <h2 className="font-serif text-2xl text-navy mb-6 pb-3 border-b border-navy/10">
                   Shop the Look
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {sortedProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="bg-warm-white border border-navy/8 group"
-                    >
-                      <div className="aspect-square overflow-hidden bg-navy/5">
-                        {product.image_url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={product.image_url}
-                            alt={product.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <p className="text-navy text-sm font-medium leading-snug mb-1">
-                          {product.title}
-                        </p>
-                        <p className="text-warm-gray text-xs mb-3">
-                          {product.price_display}
-                        </p>
-                        <a
-                          href={product.affiliate_url}
-                          rel="sponsored nofollow"
-                          target="_blank"
-                          className="inline-flex items-center gap-1.5 bg-navy text-cream text-xs px-4 py-2 tracking-widest uppercase hover:bg-brass transition-colors"
-                        >
-                          Shop {networkLabel[product.network] ?? product.retailer} ↗
-                        </a>
-                      </div>
-                    </div>
+                  {products.map((p) => (
+                    <ProductCard key={p.id} product={p} />
                   ))}
                 </div>
+                <p className="mt-6 text-navy/30 text-xs leading-relaxed">
+                  Links marked ↗ are affiliate links.{" "}
+                  <Link href="/about/our-picks" className="underline underline-offset-2 hover:text-navy/50 transition-colors">
+                    About our picks
+                  </Link>
+                </p>
               </div>
             )}
           </div>
         </div>
-      </article>
 
-      {/* Back to star */}
-      <div className="border-t border-navy/10 py-8">
-        <div className="max-w-6xl mx-auto px-6">
-          <Link
-            href={`/stars/${star.slug}`}
-            className="text-warm-gray hover:text-navy transition-colors text-sm tracking-widest uppercase"
-          >
-            ← More looks from {star.name}
-          </Link>
-        </div>
-      </div>
+        {/* More looks by this star */}
+        {siblingLooks.length > 0 && (
+          <section className="mt-20">
+            <div className="ornament-divider text-brass text-xs mb-8">◆</div>
+            <p className="text-xs tracking-widest uppercase text-navy/40 mb-6">
+              More looks by {star.name}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {siblingLooks.map((s) => (
+                <Link
+                  key={s.id}
+                  href={`/stars/${star.slug}/looks/${s.slug}`}
+                  className="group block border border-navy/10 hover:border-navy/25 transition-colors bg-white"
+                >
+                  <div className="aspect-[3/4] overflow-hidden bg-cream/50">
+                    {s.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={s.image_url}
+                        alt={s.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="font-serif italic text-navy/15 text-3xl">B</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-navy text-sm font-medium leading-snug line-clamp-2">{s.title}</p>
+                    {(s.year_display ?? s.year) && (
+                      <p className="text-navy/40 text-xs mt-0.5">{s.year_display ?? s.year}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </article>
     </>
+  );
+}
+
+// ─── Product card ─────────────────────────────────────────────────────────────
+
+function ProductCard({ product: p }: { product: Product }) {
+  const retailerName = NETWORK_LABEL[p.network] ?? p.retailer;
+  const tierLabel = TIER_LABEL[p.match_tier];
+  const tierAccent = TIER_ACCENT[p.match_tier];
+
+  return (
+    <div className="flex flex-col bg-white border border-navy/10 hover:border-navy/25 transition-colors">
+      {/* Image */}
+      <div className="aspect-square bg-cream/60 overflow-hidden flex-shrink-0">
+        {p.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={p.image_url}
+            alt={p.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="font-serif italic text-navy/15 text-3xl">B</span>
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="p-3 flex flex-col flex-1 gap-1.5">
+        <span className={`text-[10px] tracking-widest uppercase border-l-2 pl-1.5 leading-none ${tierAccent}`}>
+          {tierLabel}
+        </span>
+        <p className="text-navy text-sm font-medium leading-snug">{p.title}</p>
+        <p className="text-navy/50 text-xs">
+          {retailerName}
+          {p.price_display && <> · {p.price_display}</>}
+          {p.size && <> · <span className="font-medium">Size {p.size}</span></>}
+        </p>
+        <a
+          href={p.affiliate_url}
+          target="_blank"
+          rel="sponsored nofollow noreferrer"
+          className="mt-auto block text-center text-[10px] tracking-widest uppercase bg-navy text-cream py-2 hover:bg-brass transition-colors"
+        >
+          Shop {retailerName} ↗
+        </a>
+      </div>
+    </div>
   );
 }

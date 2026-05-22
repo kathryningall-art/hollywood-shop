@@ -292,7 +292,7 @@ function ProductCard({ product: p }: { product: BrowseProduct }) {
 
         {/* Look context — links to the look detail page */}
         <Link
-          href={`/star/${p.star.slug}/${p.look.slug}`}
+          href={`/stars/${p.star.slug}/looks/${p.look.slug}`}
           className="mt-auto pt-2.5 border-t border-navy/10 flex items-center gap-2 group hover:opacity-80 transition-opacity"
           title={`View full look: ${p.look.title}`}
         >
