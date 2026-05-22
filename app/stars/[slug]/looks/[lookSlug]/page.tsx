@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
+import { buildOpenGraph, buildTwitter, truncate } from "@/lib/og";
 
 interface Props {
   params: Promise<{ slug: string; lookSlug: string }>;
@@ -19,14 +20,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!star) return {};
   const { data: look } = await supabase
     .from("looks")
-    .select("title, editorial_text")
+    .select("title, editorial_text, image_url")
     .eq("star_id", star.id)
     .eq("slug", lookSlug)
     .single();
   if (!look) return {};
+
+  const ogTitle = `${look.title} — ${star.name} · Bias Cut Bureau`;
+  const ogDescription = truncate(look.editorial_text, 200);
+
   return {
     title: `${look.title} — ${star.name}`,
     description: look.editorial_text?.slice(0, 155) ?? "",
+    openGraph: buildOpenGraph({
+      title: ogTitle,
+      description: ogDescription,
+      image: look.image_url,
+      path: `/stars/${slug}/looks/${lookSlug}`,
+    }),
+    twitter: buildTwitter({
+      title: ogTitle,
+      description: ogDescription,
+      image: look.image_url,
+    }),
   };
 }
 

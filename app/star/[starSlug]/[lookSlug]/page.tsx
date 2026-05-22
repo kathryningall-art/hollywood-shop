@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { MatchTier } from "@/app/components/ProductFrame";
+import { buildOpenGraph, buildTwitter, truncate } from "@/lib/og";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,12 +81,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ starSlug: string; lookSlug: string }>;
 }): Promise<Metadata> {
-  const { lookSlug } = await params;
+  const { starSlug, lookSlug } = await params;
   const supabase = await createClient();
 
   const { data } = await supabase
     .from("looks")
-    .select("title, editorial_text, stars(name)")
+    .select("title, editorial_text, image_url, stars(name)")
     .eq("slug", lookSlug)
     .eq("published", true)
     .single();
@@ -97,9 +98,23 @@ export async function generateMetadata({
     data.editorial_text?.slice(0, 160) ??
     `Shop the look of ${star?.name ?? "a classic Hollywood star"}.`;
 
+  const ogTitle = `${data.title}${star ? ` — ${star.name}` : ""} · Bias Cut Bureau`;
+  const ogDescription = truncate(data.editorial_text, 200);
+
   return {
     title: `${data.title}${star ? ` — ${star.name}` : ""}`,
     description,
+    openGraph: buildOpenGraph({
+      title: ogTitle,
+      description: ogDescription,
+      image: data.image_url,
+      path: `/star/${starSlug}/${lookSlug}`,
+    }),
+    twitter: buildTwitter({
+      title: ogTitle,
+      description: ogDescription,
+      image: data.image_url,
+    }),
   };
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
+import { buildOpenGraph, buildTwitter, truncate } from "@/lib/og";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -13,13 +14,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient();
   const { data: star } = await supabase
     .from("stars")
-    .select("name, bio")
+    .select("id, name, bio, hero_image_url")
     .eq("slug", slug)
     .single();
   if (!star) return {};
+
+  // Find the star's primary look image, falling back to the hero portrait
+  const { data: looks } = await supabase
+    .from("looks")
+    .select("image_url")
+    .eq("star_id", star.id)
+    .eq("published", true)
+    .order("display_order")
+    .limit(1);
+
+  const ogImage = looks?.[0]?.image_url ?? star.hero_image_url ?? null;
+
+  const ogTitle = `${star.name} — Classic Hollywood Style · Bias Cut Bureau`;
+  const ogDescription = truncate(star.bio, 200);
+
   return {
     title: star.name,
     description: star.bio?.slice(0, 155) ?? "",
+    openGraph: buildOpenGraph({
+      title: ogTitle,
+      description: ogDescription,
+      image: ogImage,
+      path: `/stars/${slug}`,
+    }),
+    twitter: buildTwitter({
+      title: ogTitle,
+      description: ogDescription,
+      image: ogImage,
+    }),
   };
 }
 

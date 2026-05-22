@@ -1,5 +1,25 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import HomeClient from "./HomeClient";
+import { buildOpenGraph, buildTwitter } from "@/lib/og";
+
+const HOMEPAGE_TITLE = "Bias Cut Bureau — Classic Hollywood Style";
+const HOMEPAGE_DESCRIPTION =
+  "A curated editorial celebrating the style of classic Hollywood, 1915–1969. Shop the look from Louise Brooks, Katharine Hepburn, Carole Lombard, and more.";
+
+export const metadata: Metadata = {
+  title: { absolute: HOMEPAGE_TITLE },
+  description: HOMEPAGE_DESCRIPTION,
+  openGraph: buildOpenGraph({
+    title: HOMEPAGE_TITLE,
+    description: HOMEPAGE_DESCRIPTION,
+    path: "/",
+  }),
+  twitter: buildTwitter({
+    title: HOMEPAGE_TITLE,
+    description: HOMEPAGE_DESCRIPTION,
+  }),
+};
 
 export default async function HomePage() {
   const supabase = await createClient();

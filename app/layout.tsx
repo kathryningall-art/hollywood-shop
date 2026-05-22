@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Analytics } from "@vercel/analytics/next";
 import Footer from "@/app/components/Footer";
+import { SITE_URL, PINTEREST_OTHER } from "@/lib/og";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -27,7 +28,7 @@ const cormorantSC = Cormorant_SC({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.biascutbureau.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Bias Cut Bureau — Classic Hollywood Style",
     template: "%s | Bias Cut Bureau",
@@ -36,8 +37,12 @@ export const metadata: Metadata = {
     "Shop the looks of classic Hollywood's golden age — public-domain imagery, modern pieces inspired by the screen sirens of 1915–1969.",
   openGraph: {
     siteName: "Bias Cut Bureau",
-    url: "https://www.biascutbureau.com",
+    url: SITE_URL,
   },
+  twitter: {
+    card: "summary_large_image",
+  },
+  other: PINTEREST_OTHER,
 };
 
 export default function RootLayout({

@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import BrowseClient from "./BrowseClient";
+import { buildOpenGraph, buildTwitter } from "@/lib/og";
+
+const BROWSE_TITLE = "Browse All Looks — Bias Cut Bureau";
+const BROWSE_DESCRIPTION =
+  "Explore classic Hollywood shop the look — vintage, reproduction, and modern pieces curated from the silver screen.";
 
 export const metadata: Metadata = {
   title: "Browse All Products",
   description:
     "Filter and search every product on Bias Cut Bureau by category, price, size, and keyword.",
+  openGraph: buildOpenGraph({
+    title: BROWSE_TITLE,
+    description: BROWSE_DESCRIPTION,
+    path: "/browse",
+  }),
+  twitter: buildTwitter({
+    title: BROWSE_TITLE,
+    description: BROWSE_DESCRIPTION,
+  }),
 };
 
 export default async function BrowsePage() {
