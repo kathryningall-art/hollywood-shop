@@ -216,7 +216,7 @@ export default async function LookPage({ params }: Props) {
               {look.title}
             </h1>
 
-            <div className="prose-custom text-navy/80 leading-relaxed mb-12 space-y-4">
+            <div className="prose-custom text-navy/80 leading-relaxed mb-12 space-y-4 text-base">
               {look.editorial_text?.split("\n").map((para: string, i: number) => (
                 <p key={i}>{para}</p>
               ))}
