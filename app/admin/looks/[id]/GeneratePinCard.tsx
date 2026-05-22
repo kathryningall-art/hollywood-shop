@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { buildPinDescription, getSuggestedBoards, buildLookPublicUrl } from "@/lib/og";
+import {
+  buildPinDescription,
+  buildPinAltText,
+  getSuggestedBoards,
+  buildLookPublicUrl,
+} from "@/lib/og";
 
 interface GeneratePinCardProps {
   lookId: string;
@@ -30,6 +35,7 @@ export default function GeneratePinCard({
   const [error, setError] = useState("");
   const [copiedDesc, setCopiedDesc] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedAlt, setCopiedAlt] = useState(false);
 
   // Compose pin description from current form state — updates live as user edits
   const description = useMemo(
@@ -41,6 +47,16 @@ export default function GeneratePinCard({
         year,
       }),
     [lookTitle, starName, editorialText, year]
+  );
+
+  const altText = useMemo(
+    () =>
+      buildPinAltText({
+        starName: starName || "Classic Hollywood star",
+        lookTitle: lookTitle || null,
+        year,
+      }),
+    [starName, lookTitle, year]
   );
 
   const suggestedBoards = useMemo(
@@ -121,6 +137,16 @@ export default function GeneratePinCard({
       await navigator.clipboard.writeText(pinUrl);
       setCopiedUrl(true);
       setTimeout(() => setCopiedUrl(false), 2000);
+    } catch {
+      setError("Could not copy to clipboard.");
+    }
+  }
+
+  async function handleCopyAlt() {
+    try {
+      await navigator.clipboard.writeText(altText);
+      setCopiedAlt(true);
+      setTimeout(() => setCopiedAlt(false), 2000);
     } catch {
       setError("Could not copy to clipboard.");
     }
@@ -222,6 +248,31 @@ export default function GeneratePinCard({
           <p className="text-navy/40 text-xs mt-1.5">
             Suggested boards: {suggestedBoards.join(" · ")}
           </p>
+        </div>
+
+        {/* Pin alt text */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-navy text-xs tracking-widest uppercase">
+              Alt Text{" "}
+              <span className="text-navy/40 normal-case tracking-normal">
+                ({altText.length} chars · paste into Pinterest&rsquo;s alt text field)
+              </span>
+            </label>
+            <button
+              type="button"
+              onClick={handleCopyAlt}
+              className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-3 py-1.5 transition-colors"
+            >
+              {copiedAlt ? "Copied ✓" : "Copy Alt Text"}
+            </button>
+          </div>
+          <input
+            readOnly
+            value={altText}
+            className="w-full border border-navy/20 px-3 py-2.5 text-navy text-sm bg-white font-mono"
+            onFocus={(e) => e.currentTarget.select()}
+          />
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}

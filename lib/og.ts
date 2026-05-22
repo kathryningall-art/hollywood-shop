@@ -160,6 +160,41 @@ export function buildLookPublicUrl(starSlug: string, lookSlug: string): string {
 }
 
 /**
+ * Build Pinterest pin alt text — short, natural-language description
+ * for screen readers and Pinterest's visual-search SEO.
+ *
+ * Pattern:
+ *   "[Star Name] — [Look Title] ([Year]). Classic Hollywood style from Bias Cut Bureau."
+ *
+ * Falls back gracefully when look title or year is missing. Capped at ~200 chars
+ * (Pinterest accepts up to 500 but shorter reads better for screen readers).
+ */
+export function buildPinAltText({
+  starName,
+  lookTitle,
+  year,
+}: {
+  starName: string;
+  lookTitle?: string | null;
+  year?: number | null;
+}): string {
+  const MAX = 200;
+  const star = starName?.trim() || "Classic Hollywood star";
+  const title = lookTitle?.trim() || null;
+  const yearPart = typeof year === "number" && year > 0 ? ` (${year})` : "";
+
+  const lead = title ? `${star} — ${title}${yearPart}` : `${star}${yearPart}`;
+  const brand = "Classic Hollywood style from Bias Cut Bureau.";
+
+  let text = `${lead}. ${brand}`;
+  if (text.length > MAX) {
+    // Drop the look title if it pushes us over budget
+    text = `${star}${yearPart}. ${brand}`;
+  }
+  return text;
+}
+
+/**
  * Suggest which Pinterest boards a given look fits, based on its year and star.
  * Returns boards in priority order: decade-specific → star-specific → general inspiration → fallback.
  */
