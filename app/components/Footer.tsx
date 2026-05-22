@@ -30,6 +30,10 @@ export default function Footer() {
                 Pinterest
               </a>
               <span className="mx-2 text-cream/20">·</span>
+              <Link href="/about" className="hover:text-brass transition-colors">
+                About
+              </Link>
+              <span className="mx-2 text-cream/20">·</span>
               <Link href="/contact" className="hover:text-brass transition-colors">
                 Contact
               </Link>
@@ -55,7 +59,7 @@ export default function Footer() {
               <code className="text-xs">rel=&quot;sponsored nofollow&quot;</code>.
               This supports the research and editorial work behind every look.{" "}
               <Link
-                href="/about/our-picks"
+                href="/about#our-picks"
                 className="underline hover:text-cream/80 transition-colors"
               >
                 About our picks ↗
@@ -75,7 +79,7 @@ export default function Footer() {
                 <code className="text-xs">rel=&quot;sponsored nofollow&quot;</code>.
                 This supports the research and editorial work behind every look.{" "}
                 <Link
-                  href="/about/our-picks"
+                  href="/about#our-picks"
                   className="underline hover:text-cream/80 transition-colors"
                 >
                   About our picks ↗

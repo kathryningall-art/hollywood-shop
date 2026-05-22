@@ -235,7 +235,7 @@ export default async function LookPage({ params }: Props) {
                 </div>
                 <p className="mt-6 text-navy/30 text-xs leading-relaxed">
                   Links marked ↗ are affiliate links.{" "}
-                  <Link href="/about/our-picks" className="underline underline-offset-2 hover:text-navy/50 transition-colors">
+                  <Link href="/about#our-picks" className="underline underline-offset-2 hover:text-navy/50 transition-colors">
                     About our picks
                   </Link>
                 </p>

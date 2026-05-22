@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Analytics } from "@vercel/analytics/next";
 import Footer from "@/app/components/Footer";
+import MobileMenu from "@/app/components/MobileMenu";
 import { SITE_URL, PINTEREST_OTHER } from "@/lib/og";
 import "./globals.css";
 
@@ -75,7 +76,11 @@ export default function RootLayout({
               <Link href="/browse" className="hover:text-navy transition-colors px-3">
                 Browse
               </Link>
+              <Link href="/about" className="hover:text-navy transition-colors px-3">
+                About
+              </Link>
             </nav>
+            <MobileMenu />
           </div>
         </header>
 
