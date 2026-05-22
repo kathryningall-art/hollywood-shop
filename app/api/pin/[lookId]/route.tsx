@@ -166,6 +166,7 @@ function PinLayout({
         {/* Gold inset border (rectangle at 24px inset, no fill) */}
         <div
           style={{
+            display: "flex",
             position: "absolute",
             top: insetOffset,
             left: insetOffset,
@@ -179,6 +180,7 @@ function PinLayout({
         {/* Top-left */}
         <div
           style={{
+            display: "flex",
             position: "absolute",
             top: insetOffset,
             left: insetOffset,
@@ -191,6 +193,7 @@ function PinLayout({
         {/* Top-right */}
         <div
           style={{
+            display: "flex",
             position: "absolute",
             top: insetOffset,
             right: insetOffset,
@@ -203,6 +206,7 @@ function PinLayout({
         {/* Bottom-left */}
         <div
           style={{
+            display: "flex",
             position: "absolute",
             bottom: insetOffset,
             left: insetOffset,
@@ -215,6 +219,7 @@ function PinLayout({
         {/* Bottom-right */}
         <div
           style={{
+            display: "flex",
             position: "absolute",
             bottom: insetOffset,
             right: insetOffset,
@@ -228,6 +233,7 @@ function PinLayout({
         {/* Midpoint horizontal accents (left + right, starting at the inset border) */}
         <div
           style={{
+            display: "flex",
             position: "absolute",
             top: midpointYInsidePhoto - 1,
             left: insetOffset,
@@ -238,6 +244,7 @@ function PinLayout({
         />
         <div
           style={{
+            display: "flex",
             position: "absolute",
             top: midpointYInsidePhoto - 1,
             right: insetOffset,
