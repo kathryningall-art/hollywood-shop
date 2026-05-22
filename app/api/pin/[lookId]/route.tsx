@@ -60,17 +60,20 @@ async function fetchGoogleFont(
   if (!cssRes.ok) throw new Error(`Google Fonts CSS HTTP ${cssRes.status}`);
   const css = await cssRes.text();
 
-  // Prefer truetype, fall back to opentype.
+  // Satori (via opentype.js) supports TTF, OTF, and WOFF — but NOT WOFF2.
+  // Google Fonts serves whichever format the User-Agent best supports.
+  // Firefox 31 UA gets us WOFF (or sometimes TTF), never WOFF2.
   const match =
     css.match(/src:\s*url\((https:[^)]+)\)\s*format\('truetype'\)/) ||
-    css.match(/src:\s*url\((https:[^)]+)\)\s*format\('opentype'\)/);
+    css.match(/src:\s*url\((https:[^)]+)\)\s*format\('opentype'\)/) ||
+    css.match(/src:\s*url\((https:[^)]+)\)\s*format\('woff'\)/);
   if (!match) {
     console.warn(
-      `[pin] no TTF/OTF URL for ${family} ${weight}${italic ? "i" : ""}. CSS preview:`,
+      `[pin] no supported font URL for ${family} ${weight}${italic ? "i" : ""}. CSS preview:`,
       css.slice(0, 300)
     );
     throw new Error(
-      `No TTF/OTF URL found in CSS for ${family} ${weight}${italic ? "i" : ""}`
+      `No TTF/OTF/WOFF URL found in CSS for ${family} ${weight}${italic ? "i" : ""}`
     );
   }
 
