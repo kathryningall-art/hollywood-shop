@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with Bias Cut Bureau for affiliate inquiries, editorial corrections, or anything else.",
+  description:
+    "Get in touch with Bias Cut Bureau for affiliate inquiries, editorial corrections, or anything else.",
 };
 
 export default function ContactPage() {
@@ -14,13 +14,20 @@ export default function ContactPage() {
       <h1 className="font-serif text-navy text-3xl md:text-4xl mb-4 leading-snug">
         Contact
       </h1>
-      <p className="text-navy/60 leading-relaxed mb-12 md:text-lg">
+      <p className="text-navy/60 leading-relaxed mb-10 md:text-lg">
         For affiliate inquiries, image source questions, editorial corrections, or
-        anything else, you can reach Bias Cut Bureau through the form below. We
-        typically reply within a few business days.
+        anything else, please email us. We typically reply within a few business days.
       </p>
 
-      <ContactForm />
+      <div className="border-t border-b border-navy/10 py-10 text-center">
+        <p className="font-sc text-brass tracking-widest uppercase text-xs mb-3">Email</p>
+        <a
+          href="mailto:info@biascutbureau.com"
+          className="font-serif text-navy text-2xl md:text-3xl hover:text-brass transition-colors break-all"
+        >
+          info@biascutbureau.com
+        </a>
+      </div>
 
     </div>
   );

@@ -47,9 +47,10 @@ export default function PrivacyPage() {
             this site for commission purposes.
           </li>
           <li className="text-navy/70 leading-relaxed pl-4 border-l-2 border-brass/30">
-            <strong className="text-navy font-medium">Contact form data:</strong>{" "}
-            If you write to us through the contact page, we receive the information you
-            provide (typically a name and email address).
+            <strong className="text-navy font-medium">Email correspondence:</strong>{" "}
+            If you write to us at the email address listed on the contact page, we
+            receive the information you choose to share (typically a name and email
+            address). We retain that correspondence only as long as needed to respond.
           </li>
         </ul>
         <p className="text-navy/70 leading-relaxed">
@@ -67,8 +68,8 @@ export default function PrivacyPage() {
         </h2>
         <p className="text-navy/70 leading-relaxed">
           We use the information we collect to operate and improve the site, understand
-          which content is most useful to readers, and respond to messages sent through
-          the contact form. We do not sell personal information to third parties.
+          which content is most useful to readers, and respond to messages you send us by
+          email. We do not sell personal information to third parties.
         </p>
       </section>
 
