@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import HomeClient from "./HomeClient";
 import { buildOpenGraph, buildTwitter } from "@/lib/og";
 
-const HOMEPAGE_TITLE = "Bias Cut Bureau — Classic Hollywood Style";
+const HOMEPAGE_TITLE = "Bias Cut Bureau — Classic Hollywood Style, Shop the Look";
 const HOMEPAGE_DESCRIPTION =
   "A curated editorial celebrating the style of classic Hollywood, 1915–1969. Shop the look from Louise Brooks, Katharine Hepburn, Carole Lombard, and more.";
 

@@ -30,7 +30,7 @@ const cormorantSC = Cormorant_SC({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Bias Cut Bureau — Classic Hollywood Style",
+    default: "Bias Cut Bureau — Classic Hollywood Style, Shop the Look",
     template: "%s | Bias Cut Bureau",
   },
   description:
