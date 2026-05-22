@@ -11,6 +11,7 @@
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { absoluteUrl } from "@/lib/og";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -64,10 +65,16 @@ async function fetchGoogleFont(
     css.match(/src:\s*url\((https:[^)]+)\)\s*format\('truetype'\)/) ||
     css.match(/src:\s*url\((https:[^)]+)\)\s*format\('opentype'\)/);
   if (!match) {
+    console.warn(
+      `[pin] no TTF/OTF URL for ${family} ${weight}${italic ? "i" : ""}. CSS preview:`,
+      css.slice(0, 300)
+    );
     throw new Error(
       `No TTF/OTF URL found in CSS for ${family} ${weight}${italic ? "i" : ""}`
     );
   }
+
+  console.log(`[pin] font ${family} ${weight}${italic ? "i" : ""}: ${match[1].slice(-60)}`);
 
   const fontRes = await fetch(match[1]);
   if (!fontRes.ok) throw new Error(`Font binary HTTP ${fontRes.status}`);
@@ -99,20 +106,23 @@ async function loadBodoniFonts(): Promise<FontSpec[]> {
 
 // ─── M4 mark loading ──────────────────────────────────────────────────────────
 
-let m4MarkDataUrl: string | null = null;
+let m4MarkUrl: string | null = null;
 let m4MarkChecked = false;
 
 function loadM4Mark(): string | null {
-  if (m4MarkChecked) return m4MarkDataUrl;
+  if (m4MarkChecked) return m4MarkUrl;
   m4MarkChecked = true;
+  // Confirm the file exists on disk; if so, serve it as an HTTP URL (Satori
+  // handles URLs more reliably than data URLs for PNGs with transparency).
   try {
-    const buf = fs.readFileSync(path.join(process.cwd(), "public/brand/M4-mark-primary.png"));
-    m4MarkDataUrl = `data:image/png;base64,${buf.toString("base64")}`;
+    const filepath = path.join(process.cwd(), "public/brand/M4-mark-primary.png");
+    fs.accessSync(filepath, fs.constants.R_OK);
+    m4MarkUrl = absoluteUrl("/brand/M4-mark-primary.png");
   } catch (err) {
-    console.error("[pin] M4 mark missing — pin will render without it:", err);
-    m4MarkDataUrl = null;
+    console.error("[pin] M4 mark missing on disk — pin will render without it:", err);
+    m4MarkUrl = null;
   }
-  return m4MarkDataUrl;
+  return m4MarkUrl;
 }
 
 // ─── Pin layout (JSX for ImageResponse / Satori) ──────────────────────────────
