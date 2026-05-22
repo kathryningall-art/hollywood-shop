@@ -44,7 +44,8 @@ async function fetchGoogleFont(
   weight: number,
   italic: boolean
 ): Promise<ArrayBuffer> {
-  // The CSS endpoint returns WOFF2 URLs when sent a modern UA.
+  // Satori uses opentype.js which only supports TTF/OTF, not WOFF2.
+  // Use an older Firefox UA so Google Fonts serves TTF instead of WOFF2.
   const url =
     `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}` +
     `:ital,wght@${italic ? 1 : 0},${weight}&display=swap`;
@@ -52,14 +53,21 @@ async function fetchGoogleFont(
   const cssRes = await fetch(url, {
     headers: {
       "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0",
     },
   });
   if (!cssRes.ok) throw new Error(`Google Fonts CSS HTTP ${cssRes.status}`);
   const css = await cssRes.text();
 
-  const match = css.match(/src:\s*url\((https:[^)]+)\)\s*format\('woff2'\)/);
-  if (!match) throw new Error(`No woff2 URL found in CSS for ${family} ${weight}${italic ? "i" : ""}`);
+  // Prefer truetype, fall back to opentype.
+  const match =
+    css.match(/src:\s*url\((https:[^)]+)\)\s*format\('truetype'\)/) ||
+    css.match(/src:\s*url\((https:[^)]+)\)\s*format\('opentype'\)/);
+  if (!match) {
+    throw new Error(
+      `No TTF/OTF URL found in CSS for ${family} ${weight}${italic ? "i" : ""}`
+    );
+  }
 
   const fontRes = await fetch(match[1]);
   if (!fontRes.ok) throw new Error(`Font binary HTTP ${fontRes.status}`);
