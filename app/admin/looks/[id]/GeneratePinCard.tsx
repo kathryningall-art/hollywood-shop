@@ -80,10 +80,18 @@ export default function GeneratePinCard({
     [starName, year]
   );
 
+  // Pinterest strips referrer headers (especially from the mobile app), so we
+  // tag every pin URL with UTMs. Campaign = starSlug so Vercel can break down
+  // which stars are pulling traffic. utm_medium=pin marks the URL as one we
+  // (the operator) pinned ourselves, vs. visitor_save from PinSaveButton.
   const pinUrl = useMemo(
     () =>
       starSlug && lookSlug
-        ? buildLookPublicUrl(starSlug, lookSlug)
+        ? buildLookPublicUrl(starSlug, lookSlug, {
+            source: "pinterest",
+            medium: "pin",
+            campaign: starSlug,
+          })
         : "(save the look to generate a URL)",
     [starSlug, lookSlug]
   );

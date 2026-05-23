@@ -37,6 +37,32 @@ export function absoluteUrl(path: string): string {
 }
 
 /**
+ * UTM tagging — used on any URL we share externally (Pinterest pins, bio links,
+ * newsletters, etc.) so Vercel Analytics can attribute traffic when the referrer
+ * header is stripped (which Pinterest's mobile app almost always does).
+ *
+ * IMPORTANT: do NOT apply these to canonical URLs in OG/meta tags, sitemap,
+ * or internal links — only to URLs that leave the site through a share surface.
+ */
+export interface UtmParams {
+  source: string;
+  medium: string;
+  campaign?: string;
+  content?: string;
+  term?: string;
+}
+
+export function withUtm(url: string, utm: UtmParams): string {
+  const u = new URL(url);
+  u.searchParams.set("utm_source", utm.source);
+  u.searchParams.set("utm_medium", utm.medium);
+  if (utm.campaign) u.searchParams.set("utm_campaign", utm.campaign);
+  if (utm.content) u.searchParams.set("utm_content", utm.content);
+  if (utm.term) u.searchParams.set("utm_term", utm.term);
+  return u.toString();
+}
+
+/**
  * Build a Next.js-shaped OpenGraph metadata object for a page.
  * `path` is the canonical path (leading slash). `image` can be absolute or relative.
  */
@@ -217,8 +243,13 @@ export function buildPinDescription({
  * Pin destination URL — used by the admin pin generator + Pinterest Save buttons.
  * Mirrors the canonical /stars/[slug]/looks/[lookSlug] route.
  */
-export function buildLookPublicUrl(starSlug: string, lookSlug: string): string {
-  return absoluteUrl(`/stars/${starSlug}/looks/${lookSlug}`);
+export function buildLookPublicUrl(
+  starSlug: string,
+  lookSlug: string,
+  utm?: UtmParams
+): string {
+  const url = absoluteUrl(`/stars/${starSlug}/looks/${lookSlug}`);
+  return utm ? withUtm(url, utm) : url;
 }
 
 /**

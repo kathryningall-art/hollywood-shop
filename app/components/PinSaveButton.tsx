@@ -5,7 +5,7 @@
  * Designed to be absolutely positioned inside a parent with `position: relative`.
  */
 
-import { absoluteUrl } from "@/lib/og";
+import { absoluteUrl, withUtm, type UtmParams } from "@/lib/og";
 
 interface PinSaveButtonProps {
   /** Path or absolute URL of the page being pinned. */
@@ -14,17 +14,27 @@ interface PinSaveButtonProps {
   mediaUrl: string;
   /** Pre-filled pin description. */
   description: string;
+  /**
+   * Optional UTM tagging. Applied to the destination URL embedded in the pin,
+   * so when someone later clicks the pin we can attribute it in analytics.
+   * (Pinterest strips referrer headers — UTMs are the only reliable signal.)
+   */
+  utm?: UtmParams;
 }
 
 export default function PinSaveButton({
   pageUrl,
   mediaUrl,
   description,
+  utm,
 }: PinSaveButtonProps) {
+  const destinationUrl = absoluteUrl(pageUrl);
+  const taggedDestination = utm ? withUtm(destinationUrl, utm) : destinationUrl;
+
   const pinUrl =
     "https://pinterest.com/pin/create/button/?" +
     new URLSearchParams({
-      url: absoluteUrl(pageUrl),
+      url: taggedDestination,
       media: mediaUrl,
       description,
     }).toString();

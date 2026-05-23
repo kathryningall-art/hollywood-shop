@@ -188,6 +188,11 @@ export default async function LookPage({ params }: Props) {
                       editorialText: look.editorial_text,
                       year: look.year,
                     })}
+                    utm={{
+                      source: "pinterest",
+                      medium: "pin_save",
+                      campaign: star.slug,
+                    }}
                   />
                 </>
               )}
