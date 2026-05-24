@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { FrameSwatch, type MatchTier } from "@/app/components/ProductFrame";
 import { suggestProducts, type ProductSuggestion } from "@/app/actions/suggestProducts";
 import { importProductsFromUrls, type ImportedProduct } from "@/app/actions/importProducts";
+import SortableList, { DragHandle, diffOrder } from "@/app/admin/components/SortableList";
 
 type Product = {
   id: string;
@@ -176,6 +177,22 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
     setProducts((prev) => prev.filter((p) => p.id !== id));
   }
 
+  async function handleReorder(next: Product[]) {
+    const updates = diffOrder(products, next);
+    const renumbered = next.map((p, i) => ({ ...p, display_order: i }));
+    setProducts(renumbered);
+    try {
+      const supabase = createClient();
+      await Promise.all(
+        updates.map((u) =>
+          supabase.from("products").update({ display_order: u.display_order }).eq("id", u.id)
+        )
+      );
+    } catch (err) {
+      console.error("[products reorder] persist failed:", err);
+    }
+  }
+
   async function handleSuggest() {
     if (!lookMeta?.image_url) return;
     setSuggesting(true);
@@ -214,43 +231,42 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
           <p className="text-navy/40 text-sm italic">No products yet.</p>
         )}
 
-        {products.map((p) =>
-          editingId === p.id ? (
-            <ProductForm
-              key={p.id}
-              form={form}
-              set={set}
-              onSave={saveProduct}
-              onCancel={cancelEdit}
-              saving={saving}
-              error={error}
-            />
-          ) : (
-            <div
-              key={p.id}
-              className="border border-navy/10 px-4 py-3 flex items-center gap-4 bg-white hover:border-navy/20"
-            >
-              {p.image_url && (
-                <img src={p.image_url} alt={p.title} className="w-12 h-12 object-cover flex-shrink-0" />
+        {editingId !== null
+          ? // Inline edit in progress — render flat list, no drag.
+            products.map((p) =>
+              editingId === p.id ? (
+                <ProductForm
+                  key={p.id}
+                  form={form}
+                  set={set}
+                  onSave={saveProduct}
+                  onCancel={cancelEdit}
+                  saving={saving}
+                  error={error}
+                />
+              ) : (
+                <ProductRow
+                  key={p.id}
+                  product={p}
+                  onEdit={() => startEdit(p)}
+                  onDelete={() => deleteProduct(p.id)}
+                />
+              )
+            )
+          : // No edit active — sortable.
+            <SortableList items={products} onReorder={handleReorder}>
+              {(p, { ref, style, handleProps, isDragging }) => (
+                <div ref={ref} style={style}>
+                  <ProductRow
+                    product={p}
+                    onEdit={() => startEdit(p)}
+                    onDelete={() => deleteProduct(p.id)}
+                    handleProps={handleProps}
+                    isDragging={isDragging}
+                  />
+                </div>
               )}
-              <div className="flex-1 min-w-0">
-                <p className="text-navy text-sm font-medium truncate">{p.title}</p>
-                <p className="text-navy/50 text-xs">
-                  {p.retailer} · {p.network} · {p.price_display || "no price"} · order {p.display_order}
-                </p>
-                <p className="text-navy/40 text-xs capitalize">{(p.match_tier ?? "modern").replace(/_/g, " ")}</p>
-              </div>
-              <div className="flex gap-3 flex-shrink-0">
-                <button onClick={() => startEdit(p)} className="text-xs text-brass hover:text-navy uppercase tracking-widest">
-                  Edit
-                </button>
-                <button onClick={() => deleteProduct(p.id)} className="text-xs text-navy/30 hover:text-red-600 uppercase tracking-widest">
-                  Delete
-                </button>
-              </div>
-            </div>
-          )
-        )}
+            </SortableList>}
 
         {editingId === "new" && (
           <ProductForm
@@ -345,6 +361,51 @@ export default function ProductsPage({ params }: { params: Promise<{ id: string 
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function ProductRow({
+  product: p,
+  onEdit,
+  onDelete,
+  handleProps,
+  isDragging,
+}: {
+  product: Product;
+  onEdit: () => void;
+  onDelete: () => void;
+  handleProps?: {
+    attributes: Record<string, unknown>;
+    listeners: Record<string, unknown> | undefined;
+  };
+  isDragging?: boolean;
+}) {
+  return (
+    <div
+      className={`border px-4 py-3 flex items-center gap-3 bg-white ${
+        isDragging ? "border-brass shadow-lg" : "border-navy/10 hover:border-navy/20"
+      }`}
+    >
+      {handleProps && <DragHandle {...handleProps} />}
+      {p.image_url && (
+        <img src={p.image_url} alt={p.title} className="w-12 h-12 object-cover flex-shrink-0" />
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="text-navy text-sm font-medium truncate">{p.title}</p>
+        <p className="text-navy/50 text-xs">
+          {p.retailer} · {p.network} · {p.price_display || "no price"} · order {p.display_order}
+        </p>
+        <p className="text-navy/40 text-xs capitalize">{(p.match_tier ?? "modern").replace(/_/g, " ")}</p>
+      </div>
+      <div className="flex gap-3 flex-shrink-0">
+        <button onClick={onEdit} className="text-xs text-brass hover:text-navy uppercase tracking-widest">
+          Edit
+        </button>
+        <button onClick={onDelete} className="text-xs text-navy/30 hover:text-red-600 uppercase tracking-widest">
+          Delete
+        </button>
+      </div>
     </div>
   );
 }

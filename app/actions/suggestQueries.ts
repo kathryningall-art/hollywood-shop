@@ -121,6 +121,7 @@ Respond with valid JSON only, no markdown fences:
     return { success: true, slots: filled };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[suggestQueries] error:", err);
     return { success: false, error: message };
   }
 }
