@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { generateEditorial, type EditorialVariant } from "@/app/actions/generateEditorial";
 import ImageUpload from "@/app/admin/ImageUpload";
 import GeneratePinCard from "./GeneratePinCard";
+import GenerateProposalsModal from "./GenerateProposalsModal";
 
 const LICENSE_OPTIONS = [
   { value: "public_domain_us", label: "Public Domain (US)" },
@@ -31,6 +32,7 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
   const [generating, setGenerating] = useState(false);
   const [variants, setVariants] = useState<EditorialVariant[] | null>(null);
   const [generateError, setGenerateError] = useState("");
+  const [proposalsOpen, setProposalsOpen] = useState(false);
 
   const [form, setForm] = useState({
     star_id: "",
@@ -145,12 +147,12 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
         title: form.title,
         year: year || null,
         year_display: form.year_display || null,
-        image_url: form.image_url || null,
-        image_credit: form.image_credit || null,
-        image_source_url: form.image_source_url || null,
+        image_url: form.image_url || "",
+        image_credit: form.image_credit || "",
+        image_source_url: form.image_source_url || "",
         image_license: form.image_license,
         license_verified: form.license_verified,
-        license_verification_notes: form.license_verification_notes || null,
+        license_verification_notes: form.license_verification_notes || "",
         editorial_text: form.editorial_text || "",
         published: form.published,
       })
@@ -175,14 +177,44 @@ export default function EditLookPage({ params }: { params: Promise<{ id: string 
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-serif text-navy text-2xl">Edit Look</h1>
         {id && (
-          <Link
-            href={`/admin/looks/${id}/products`}
-            className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-4 py-2 transition-colors"
-          >
-            Manage Products
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setProposalsOpen(true)}
+              disabled={!form.image_url}
+              className="text-xs tracking-widest uppercase text-cream bg-navy hover:bg-brass px-4 py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={!form.image_url ? "Add an image URL first" : ""}
+            >
+              Generate Proposals
+            </button>
+            <Link
+              href={`/admin/looks/${id}/proposals`}
+              className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-4 py-2 transition-colors"
+            >
+              Review Proposals
+            </Link>
+            <Link
+              href={`/admin/looks/${id}/products`}
+              className="text-xs tracking-widest uppercase text-brass hover:text-navy border border-brass px-4 py-2 transition-colors"
+            >
+              Manage Products
+            </Link>
+          </div>
         )}
       </div>
+
+      {id && (
+        <GenerateProposalsModal
+          open={proposalsOpen}
+          onClose={() => setProposalsOpen(false)}
+          lookId={id}
+          imageUrl={form.image_url}
+          starName={selectedStar?.name ?? ""}
+          year={parseInt(form.year) || null}
+          title={form.title}
+          editorialText={form.editorial_text}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Field label="Star" required>
