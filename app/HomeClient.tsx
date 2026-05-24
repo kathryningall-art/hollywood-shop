@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import ProductFrame, { type MatchTier } from "@/app/components/ProductFrame";
 
 type Product = {
@@ -237,16 +238,20 @@ export default function HomeClient({
                   {starLooks.map((look) => {
                     const isActive = expandedLookId === look.id;
                     const isFirstLook = look.id === firstLookId && expandedLookId === null;
+                    const lookHref = `/stars/${star.slug}/looks/${look.slug}`;
                     return (
-                      <button
+                      <div
                         key={look.id}
-                        onClick={() => toggleLook(look.id)}
                         onMouseEnter={() => expandedLookId === null && setHoveredLookId(look.id)}
                         onMouseLeave={() => setHoveredLookId(null)}
                         className="group block text-left shrink-0 w-44 md:w-52"
                       >
-                        <div
-                          className={`aspect-[3/4] relative overflow-hidden mb-2 rounded-sm transition-all duration-300 ${
+                        {/* Image area: clicking expands the inline Shop the Look products */}
+                        <button
+                          type="button"
+                          onClick={() => toggleLook(look.id)}
+                          aria-label={isActive ? `Hide products for ${look.title}` : `Shop the look: ${look.title}`}
+                          className={`block w-full aspect-[3/4] relative overflow-hidden mb-2 rounded-sm transition-all duration-300 ${
                             isActive
                               ? "ring-2 ring-brass ring-offset-1"
                               : "ring-0"
@@ -278,15 +283,22 @@ export default function HomeClient({
                               ×
                             </div>
                           )}
-                        </div>
-                        <p
-                          className={`font-serif text-sm leading-snug transition-colors ${
-                            isActive ? "text-brass" : "text-navy group-hover:text-brass"
-                          }`}
-                        >
-                          {look.title}
-                        </p>
-                      </button>
+                        </button>
+                        {/* Title + explicit "Read the story" link — navigates to the
+                            dedicated look detail page where the editorial paragraph lives. */}
+                        <Link href={lookHref} className="block">
+                          <span
+                            className={`block font-serif text-sm leading-snug transition-colors ${
+                              isActive ? "text-brass" : "text-navy group-hover:text-brass"
+                            }`}
+                          >
+                            {look.title}
+                          </span>
+                          <span className="mt-1 inline-block text-brass text-[10px] uppercase tracking-widest hover:underline underline-offset-2">
+                            More about this Look →
+                          </span>
+                        </Link>
+                      </div>
                     );
                   })}
                 </div>
