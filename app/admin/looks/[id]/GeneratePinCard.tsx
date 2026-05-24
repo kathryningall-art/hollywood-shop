@@ -31,6 +31,7 @@ export default function GeneratePinCard({
   starName,
   starSlug,
 }: GeneratePinCardProps) {
+  const [theme, setTheme] = useState<"cream" | "navy" | "brass" | "reel" | "spotlight">("cream");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -96,7 +97,7 @@ export default function GeneratePinCard({
     [starSlug, lookSlug]
   );
 
-  const downloadFilename = `${starSlug || "star"}-${lookSlug || "look"}-pin.png`;
+  const downloadFilename = `${starSlug || "star"}-${lookSlug || "look"}-pin-${theme}.png`;
 
   async function handlePreview() {
     setError("");
@@ -104,7 +105,7 @@ export default function GeneratePinCard({
     setPreviewUrl(null);
     try {
       // Cache-bust each click so the preview reflects the latest saved DB state
-      const res = await fetch(`/api/pin/${lookId}?v=${Date.now()}`);
+      const res = await fetch(`/api/pin/${lookId}?v=${Date.now()}&theme=${theme}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
         const msg = body.detail ? `${body.error}: ${body.detail}` : (body.error ?? `HTTP ${res.status}`);
@@ -125,7 +126,7 @@ export default function GeneratePinCard({
     setError("");
     setDownloading(true);
     try {
-      const res = await fetch(`/api/pin/${lookId}?v=${Date.now()}`);
+      const res = await fetch(`/api/pin/${lookId}?v=${Date.now()}&theme=${theme}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({ error: "Download failed" }));
         throw new Error(body.error ?? `Download failed (HTTP ${res.status})`);
@@ -172,6 +173,66 @@ export default function GeneratePinCard({
             This look has no hero image. Add one above to enable preview &amp; download.
           </div>
         )}
+
+        {/* Theme toggle */}
+        <div className="flex gap-2 items-center">
+          <span className="text-xs tracking-widest uppercase text-navy/50">Background:</span>
+          <button
+            type="button"
+            onClick={() => { setTheme("cream"); setPreviewUrl(null); }}
+            className={`text-xs tracking-widest uppercase px-3 py-1.5 border transition-colors ${
+              theme === "cream"
+                ? "bg-navy text-cream border-navy"
+                : "text-navy/60 border-navy/20 hover:border-navy hover:text-navy"
+            }`}
+          >
+            Cream
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTheme("navy"); setPreviewUrl(null); }}
+            className={`text-xs tracking-widest uppercase px-3 py-1.5 border transition-colors ${
+              theme === "navy"
+                ? "bg-navy text-cream border-navy"
+                : "text-navy/60 border-navy/20 hover:border-navy hover:text-navy"
+            }`}
+          >
+            Navy
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTheme("brass"); setPreviewUrl(null); }}
+            className={`text-xs tracking-widest uppercase px-3 py-1.5 border transition-colors ${
+              theme === "brass"
+                ? "bg-navy text-cream border-navy"
+                : "text-navy/60 border-navy/20 hover:border-navy hover:text-navy"
+            }`}
+          >
+            Brass
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTheme("reel"); setPreviewUrl(null); }}
+            className={`text-xs tracking-widest uppercase px-3 py-1.5 border transition-colors ${
+              theme === "reel"
+                ? "bg-navy text-cream border-navy"
+                : "text-navy/60 border-navy/20 hover:border-navy hover:text-navy"
+            }`}
+          >
+            Reel
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTheme("spotlight"); setPreviewUrl(null); }}
+            className={`text-xs tracking-widest uppercase px-3 py-1.5 border transition-colors ${
+              theme === "spotlight"
+                ? "bg-navy text-cream border-navy"
+                : "text-navy/60 border-navy/20 hover:border-navy hover:text-navy"
+            }`}
+          >
+            Spotlight
+          </button>
+        </div>
 
         {/* Preview + Download buttons */}
         <div className="flex flex-wrap gap-3">
