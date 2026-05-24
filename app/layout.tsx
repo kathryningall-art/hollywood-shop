@@ -7,6 +7,7 @@ import Script from "next/script";
 import Footer from "@/app/components/Footer";
 import MobileMenu from "@/app/components/MobileMenu";
 import { SITE_URL, PINTEREST_OTHER } from "@/lib/og";
+import { organizationSchema, safeJsonLd } from "@/lib/jsonld";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -88,6 +89,10 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
 
         <Footer />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema()) }}
+        />
         <Analytics />
         <Script src="https://s.skimresources.com/js/303526X1791575.skimlinks.js" strategy="afterInteractive" />
       </body>

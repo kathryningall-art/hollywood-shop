@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
-import { buildOpenGraph, buildTwitter, truncate, buildPinDescription } from "@/lib/og";
+import { buildOpenGraph, buildTwitter, truncate, buildPinDescription, SITE_URL } from "@/lib/og";
+import { breadcrumbSchema, articleSchema, safeJsonLd } from "@/lib/jsonld";
 import PinSaveButton from "@/app/components/PinSaveButton";
 import type { MatchTier } from "@/app/components/ProductFrame";
 
@@ -143,8 +144,36 @@ export default async function LookPage({ params }: Props) {
 
   const siblingLooks = (siblings ?? []) as SiblingLook[];
 
+  const pageUrl = `${SITE_URL}/stars/${star.slug}/looks/${lookSlug}`;
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd(
+            breadcrumbSchema([
+              { name: "Collections", url: SITE_URL },
+              { name: star.name, url: `${SITE_URL}/stars/${star.slug}` },
+              { name: look.title },
+            ])
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd(
+            articleSchema({
+              title: `${look.title} — ${star.name}`,
+              description: look.editorial_text ?? "",
+              imageUrl: look.image_url,
+              pageUrl,
+              aboutName: star.name,
+            })
+          ),
+        }}
+      />
       {/* Breadcrumb */}
       <nav className="max-w-6xl mx-auto px-6 pt-8 pb-0">
         <p className="text-warm-gray text-sm">

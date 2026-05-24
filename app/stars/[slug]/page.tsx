@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
-import { buildOpenGraph, buildTwitter, truncate } from "@/lib/og";
+import { buildOpenGraph, buildTwitter, truncate, SITE_URL } from "@/lib/og";
+import { breadcrumbSchema, personSchema, safeJsonLd } from "@/lib/jsonld";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -71,6 +72,30 @@ export default async function StarPage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd(
+            breadcrumbSchema([
+              { name: "Collections", url: SITE_URL },
+              { name: star.name },
+            ])
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLd(
+            personSchema({
+              name: star.name,
+              description: star.bio,
+              imageUrl: star.hero_image_url,
+              pageUrl: `${SITE_URL}/stars/${slug}`,
+            })
+          ),
+        }}
+      />
       {/* Star hero */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-12 md:pt-24 md:pb-16 grid md:grid-cols-[1fr_2fr] gap-12 items-start">
         <div className="aspect-[3/4] relative overflow-hidden bg-navy/5 max-w-xs">
