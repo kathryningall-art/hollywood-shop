@@ -3,6 +3,7 @@ import { Bodoni_Moda, EB_Garamond, Cormorant_SC } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import Footer from "@/app/components/Footer";
 import MobileMenu from "@/app/components/MobileMenu";
 import { SITE_URL, PINTEREST_OTHER } from "@/lib/og";
@@ -88,6 +89,7 @@ export default function RootLayout({
 
         <Footer />
         <Analytics />
+        <Script src="https://s.skimresources.com/js/303526X1791575.skimlinks.js" strategy="afterInteractive" />
       </body>
     </html>
   );
