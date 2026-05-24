@@ -444,11 +444,15 @@ export async function GET(
       },
     });
   } catch (err) {
+    // Full detail (message + stack) goes to server logs only — never to the
+    // response body, which would leak file paths and dependency internals.
     console.error("[pin] handler crashed:", err);
+    const isDev = process.env.NODE_ENV !== "production";
     const message = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : undefined;
     return Response.json(
-      { error: "Pin generation failed", detail: message, stack },
+      isDev
+        ? { error: "Pin generation failed", detail: message, stack: err instanceof Error ? err.stack : undefined }
+        : { error: "Pin generation failed" },
       { status: 500 }
     );
   }
