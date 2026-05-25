@@ -3,6 +3,7 @@ import Link from "next/link";
 import { La_Belle_Aurore } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
+import { buildOpenGraph, buildTwitter } from "@/lib/og";
 
 const laBelleAurore = La_Belle_Aurore({
   subsets: ["latin"],
@@ -10,10 +11,21 @@ const laBelleAurore = La_Belle_Aurore({
   display: "swap",
 });
 
+const DESCRIPTION =
+  "Bias Cut Bureau is a curated editorial dedicated to the style of classic Hollywood, from the silent-era cool of Louise Brooks to the studio-era glamour of Katharine Hepburn.";
+
 export const metadata: Metadata = {
   title: "About",
-  description:
-    "Bias Cut Bureau is a curated editorial dedicated to the style of classic Hollywood, from the silent-era cool of Louise Brooks to the studio-era glamour of Katharine Hepburn.",
+  description: DESCRIPTION,
+  openGraph: buildOpenGraph({
+    title: "About Bias Cut Bureau",
+    description: DESCRIPTION,
+    path: "/about",
+  }),
+  twitter: buildTwitter({
+    title: "About Bias Cut Bureau",
+    description: DESCRIPTION,
+  }),
 };
 
 export default async function AboutPage() {
