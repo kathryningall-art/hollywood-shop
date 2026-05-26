@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Script from "next/script";
 import Footer from "@/app/components/Footer";
 import MobileMenu from "@/app/components/MobileMenu";
 import { SITE_URL, PINTEREST_OTHER } from "@/lib/og";
@@ -98,7 +97,6 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema()) }}
         />
         <Analytics />
-        <Script src="https://s.skimresources.com/js/303526X1791575.skimlinks.js" strategy="afterInteractive" />
         <GoogleAnalytics gaId="G-BCVKP2CGXZ" />
       </body>
     </html>

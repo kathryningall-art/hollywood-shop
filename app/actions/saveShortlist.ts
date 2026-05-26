@@ -7,8 +7,9 @@ type SaveResult =
   | { success: true; added: number; redirect: string }
   | { success: false; error: string };
 
-// Hostname → affiliate network mapping. Anything not listed routes via Skimlinks
-// (we store as "direct" and the JS tag monetizes at click time).
+// Hostname → affiliate network mapping. Anything not listed is stored as
+// "direct" — a raw link with no affiliate kickback. To monetize a new
+// retailer, add its hostname here and sign up for that network individually.
 const NETWORK_FROM_HOST: Record<string, string> = {
   "amazon.com": "amazon",
   "amazon.co.uk": "amazon",
@@ -44,7 +45,7 @@ function applyAffiliateTag(url: string): string {
       return url;
     }
   }
-  // Skimlinks JS handles non-Amazon links at click time — store raw.
+  // Non-Amazon links are stored raw — no affiliate tag applied.
   return url;
 }
 
